@@ -1,0 +1,244 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── People ──────────────────────────────────────────────────────────────────
+
+model Student {
+  id                 String   @id @default(uuid())
+  rollNumber         String   @unique
+  name               String
+  email              String   @unique
+  year               Int
+  branch             String
+  program            String   @default("btech") // btech | mtech | phd
+  gender             String?
+  phone              String?
+  priorityTier       Int      @default(0)
+  passwordHash       String
+  mustChangePassword Boolean  @default(true)
+  onboardingDone     Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  assignment      RoomAssignment?
+  invitesSent     RoommateInvite[] @relation("InviteSender")
+  invitesReceived RoommateInvite[] @relation("InviteReceiver")
+  notifications   Notification[]
+  swapsRequested  SwapRequest[]    @relation("SwapRequester")
+  swapsReceived   SwapRequest[]    @relation("SwapTarget")
+  preference      RoomPreference?
+}
+
+model Teacher {
+  id                 String   @id @default(uuid())
+  employeeId         String   @unique
+  name               String
+  email              String   @unique
+  gender             String
+  department         String
+  phone              String?
+  passwordHash       String
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
+
+  assignment RoomAssignment?
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   // superadmin | warden
+  hostelId     String?
+  hostel       Hostel?  @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+}
+
+// ─── Hostel & Room ───────────────────────────────────────────────────────────
+
+model Hostel {
+  id         String  @id @default(uuid())
+  name       String
+  gender     String  // male | female | mixed
+  totalRooms Int
+  address    String?
+
+  rooms        Room[]
+  restrictions HostelRestriction[]
+  admins       Admin[]
+  notices      Notice[]
+  windows      AllocationWindow[]
+}
+
+model Room {
+  id            String  @id @default(uuid())
+  hostelId      String
+  hostel        Hostel  @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  roomNumber    String
+  capacity      Int
+
+  allowedGender String? // null = hostel default; male | female = override (mixed hostels)
+  status        String  @default("available") // available | maintenance | reserved
+  isPublic      Boolean @default(true) // true = anyone can book vacant beds; false = invitation only (group mode)
+  privateUntil  DateTime? // Room remains private until this time to allow group formation
+
+  assignments RoomAssignment[]
+  invites     RoommateInvite[]
+
+  @@unique([hostelId, roomNumber])
+}
+
+model HostelRestriction {
+  id                String    @id @default(uuid())
+  hostelId          String
+  hostel            Hostel    @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  allowedYears      Int[]
+  allowedPrograms   String[]
+  allowedGender     String?
+  priorityOnlyUntil DateTime?
+  notes             String?
+}
+
+// ─── Allocation Window ────────────────────────────────────────────────────────
+
+model AllocationWindow {
+  id              String    @id @default(uuid())
+  name            String
+  gender          String    @default("male") // male | female | mixed
+  hostelId        String?   // null = all hostels of this gender
+  hostel          Hostel?   @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  allowedPrograms String[]  // btech | mtech | phd  empty = all
+  allowedYears    Int[]     // 1 | 2 | 3 | 4  empty = all
+  opensAt         DateTime
+  closesAt        DateTime
+  isActive        Boolean   @default(false)
+  lockedAt        DateTime?
+  createdAt       DateTime  @default(now())
+
+  assignments     RoomAssignment[]
+  invites         RoommateInvite[]
+}
+
+// ─── Assignments ──────────────────────────────────────────────────────────────
+
+model RoomAssignment {
+  id               String           @id @default(uuid())
+  studentId        String?          @unique
+  student          Student?         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacherId        String?          @unique
+  teacher          Teacher?         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  roomId           String
+  room             Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  allocationWindow AllocationWindow @relation(fields: [windowId], references: [id], onDelete: Cascade)
+  windowId         String
+  bookedAt         DateTime         @default(now())
+  status           String           @default("confirmed") // confirmed | cancelled
+  adminOverride    Boolean          @default(false)
+  notes            String?
+
+  @@index([roomId])
+  @@index([bookedAt])
+}
+
+// ─── Roommate Invites ─────────────────────────────────────────────────────────
+
+model RoommateInvite {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     Student  @relation("InviteSender",   fields: [senderId],   references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   Student  @relation("InviteReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  room       Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId     String
+  window     AllocationWindow @relation(fields: [windowId], references: [id], onDelete: Cascade)
+  windowId   String
+  status     String           @default("pending") // pending | accepted | declined | expired
+  expiresAt  DateTime
+  createdAt  DateTime         @default(now())
+
+  @@index([receiverId])
+  @@index([senderId])
+}
+
+// ─── Swap Requests ────────────────────────────────────────────────────────────
+
+model SwapRequest {
+  id          String    @id @default(uuid())
+  requesterId String
+  requester   Student   @relation("SwapRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  targetId    String
+  target      Student   @relation("SwapTarget",    fields: [targetId],    references: [id], onDelete: Cascade)
+  status      String    @default("pending") // pending | accepted | declined | expired
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  @@index([targetId])
+}
+
+
+// ─── Room Preferences ─────────────────────────────────────────────────────────
+
+model RoomPreference {
+  id         String   @id @default(uuid())
+  studentId  String   @unique
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  windowId   String
+
+
+  seaterPref Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type      String   // booking_confirmed | booking_cancelled | invite_received | invite_accepted | invite_declined | window_opened | swap_requested | swap_accepted | notice
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([studentId, isRead])
+}
+
+// ─── Notice Board ─────────────────────────────────────────────────────────────
+
+model Notice {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  priority  String   @default("info") // info | warning | urgent
+  hostelId  String?  // null = visible to all; hostelId = scoped to one hostel
+  hostel    Hostel?  @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// ─── Audit Log ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  actorName  String?
+  actorType  String?  // student | admin | teacher | system
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
