@@ -4,7 +4,7 @@ import { generateTokens, verifyRefreshToken, revokeRefreshToken, hashPassword, c
 import { loginSchema, refreshSchema } from './auth.schema';
 import { handleError } from '../../middleware/errorHandler.middleware';
 
-// ─── Student Login ────────────────────────────────────────────────────────────
+// Student Login 
 export const studentLogin = async (req: Request, res: Response) => {
   try {
     const { rollNumber, password } = loginSchema.parse(req.body);
@@ -29,7 +29,7 @@ export const studentLogin = async (req: Request, res: Response) => {
   }
 };
 
-// ─── Admin / Teacher Login ────────────────────────────────────────────────────
+// Admin / Teacher Login 
 export const adminLogin = async (req: Request, res: Response) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
@@ -46,7 +46,7 @@ export const adminLogin = async (req: Request, res: Response) => {
   }
 };
 
-// ─── Teacher Login ────────────────────────────────────────────────────────────
+// Teacher Login 
 export const teacherLogin = async (req: Request, res: Response) => {
   try {
     const { employeeId, password } = req.body;
@@ -71,7 +71,7 @@ export const teacherLogin = async (req: Request, res: Response) => {
   }
 };
 
-// ─── Complete Onboarding (first-login: set password + gender) ─────────────────
+// Complete Onboarding (first-login: set password + gender)
 export const completeOnboarding = async (req: Request, res: Response) => {
   try {
     const { newPassword, gender } = req.body;
@@ -109,7 +109,7 @@ export const completeOnboarding = async (req: Request, res: Response) => {
   }
 };
 
-// ─── Change Password (authenticated students & teachers) ──────────────────────
+// Change Password (authenticated students & teachers) 
 export const changePassword = async (req: Request, res: Response) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -146,7 +146,7 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-// ─── Admin: Force-reset a student or teacher password ────────────────────────
+// Admin: Force-reset a student or teacher password 
 export const adminResetPassword = async (req: Request, res: Response) => {
   try {
     const { targetId, targetType, newPassword } = req.body; // targetType: 'student' | 'teacher'
@@ -167,7 +167,7 @@ export const adminResetPassword = async (req: Request, res: Response) => {
   }
 };
 
-// ─── Refresh Token ────────────────────────────────────────────────────────────
+// Refresh Token 
 export const refresh = async (req: Request, res: Response) => {
   try {
     const { refreshToken } = refreshSchema.parse(req.body);
@@ -185,7 +185,7 @@ export const refresh = async (req: Request, res: Response) => {
   }
 };
 
-// ─── Logout ───────────────────────────────────────────────────────────────────
+// Logout 
 export const logout = async (req: Request, res: Response) => {
   try {
     const { refreshToken } = refreshSchema.parse(req.body);
