@@ -33,7 +33,7 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
   res.json(safe);
 };
 
-//  Hostels & Rooms ─
+//  Hostels & Rooms
 export const getEligibleHostels = async (req: AuthRequest, res: Response) => {
   try {
     const student = await prisma.student.findUnique({ where: { id: req.user!.id } });
