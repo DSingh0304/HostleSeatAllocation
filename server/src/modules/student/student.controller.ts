@@ -7,7 +7,7 @@ import { handleError } from '../../middleware/errorHandler.middleware';
 const s = (v: unknown): string => String(v ?? '');
 const n = (v: unknown): number => Number(v);
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
+//  Profile 
 export const getProfile = async (req: AuthRequest, res: Response) => {
   const studentId = req.user!.id;
   const student = await prisma.student.findUnique({ 
@@ -33,7 +33,7 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
   res.json(safe);
 };
 
-// ─── Hostels & Rooms ──────────────────────────────────────────────────────────
+//  Hostels & Rooms ─
 export const getEligibleHostels = async (req: AuthRequest, res: Response) => {
   try {
     const student = await prisma.student.findUnique({ where: { id: req.user!.id } });
@@ -120,7 +120,7 @@ export const getActiveWindow = async (_req: Request, res: Response) => {
   res.json(win ?? null);
 };
 
-// ─── Notifications ────────────────────────────────────────────────────────────
+//  Notifications 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   const notifications = await prisma.notification.findMany({
     where: { studentId: req.user!.id },
@@ -143,7 +143,7 @@ export const markAllNotificationsRead = async (req: AuthRequest, res: Response) 
   res.json({ message: 'All notifications marked as read' });
 };
 
-// ─── Notices ──────────────────────────────────────────────────────────────────
+//  Notices 
 export const getNotices = async (req: AuthRequest, res: Response) => {
   try {
     const student = await prisma.student.findUnique({ where: { id: req.user!.id }, include: { assignment: { include: { room: true } } } });
@@ -159,7 +159,7 @@ export const getNotices = async (req: AuthRequest, res: Response) => {
   } catch (e: any) { handleError(e, req, res); }
 };
 
-// ─── Room Preferences ─────────────────────────────────────────────────────────
+//  Room Preferences 
 export const getPreferences = async (req: AuthRequest, res: Response) => {
   const preference = await prisma.roomPreference.findUnique({ where: { studentId: req.user!.id } });
   res.json(preference);
@@ -176,7 +176,7 @@ export const setPreferences = async (req: AuthRequest, res: Response) => {
   res.json(preference);
 };
 
-// ─── Roommate Invites ─────────────────────────────────────────────────────────
+//  Roommate Invites 
 export const sendInvite = async (req: AuthRequest, res: Response) => {
   try {
     const senderId = req.user!.id;
