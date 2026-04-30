@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import prisma from '../../lib/prisma';
 import { generateTokens, verifyRefreshToken, revokeRefreshToken, hashPassword, comparePassword } from './auth.service';
 import { loginSchema, refreshSchema } from './auth.schema';
-import { handleError } from '../../middleware/errorHandler.middleware';
 
 // Student Login 
 export const studentLogin = async (req: Request, res: Response) => {
