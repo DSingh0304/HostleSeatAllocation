@@ -1,11 +1,9 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import prisma from '../../lib/prisma';
 import redis from '../../lib/redis';
 import { randomUUID } from 'crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey123';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'anotherrefreshsecretkey456';
 
 interface TokenPayload {
   id: string;
