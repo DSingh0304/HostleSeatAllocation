@@ -9,7 +9,7 @@
     "start": "node dist/app.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "ts-node src/seed.ts",
+    "seed": "dotenv -e .env.local -- ts-node src/seed.ts",
     "test": "vitest"
   },
   "keywords": [],
