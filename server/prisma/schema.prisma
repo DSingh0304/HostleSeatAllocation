@@ -9,7 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── People ──────────────────────────────────────────────────────────────────
+//  People 
 
 model Student {
   id                 String   @id @default(uuid())
@@ -62,7 +62,7 @@ model Admin {
   createdAt    DateTime @default(now())
 }
 
-// ─── Hostel & Room ───────────────────────────────────────────────────────────
+//  Hostel & Room 
 
 model Hostel {
   id         String  @id @default(uuid())
@@ -108,7 +108,7 @@ model HostelRestriction {
   notes             String?
 }
 
-// ─── Allocation Window ────────────────────────────────────────────────────────
+//  Allocation Window 
 
 model AllocationWindow {
   id              String    @id @default(uuid())
@@ -128,7 +128,7 @@ model AllocationWindow {
   invites         RoommateInvite[]
 }
 
-// ─── Assignments ──────────────────────────────────────────────────────────────
+//  Assignments 
 
 model RoomAssignment {
   id               String           @id @default(uuid())
@@ -149,7 +149,7 @@ model RoomAssignment {
   @@index([bookedAt])
 }
 
-// ─── Roommate Invites ─────────────────────────────────────────────────────────
+//  Roommate Invites 
 
 model RoommateInvite {
   id         String   @id @default(uuid())
@@ -169,7 +169,7 @@ model RoommateInvite {
   @@index([senderId])
 }
 
-// ─── Swap Requests ────────────────────────────────────────────────────────────
+//  Swap Requests 
 
 model SwapRequest {
   id          String    @id @default(uuid())
@@ -186,7 +186,7 @@ model SwapRequest {
 }
 
 
-// ─── Room Preferences ─────────────────────────────────────────────────────────
+//  Room Preferences 
 
 model RoomPreference {
   id         String   @id @default(uuid())
@@ -200,7 +200,7 @@ model RoomPreference {
   updatedAt  DateTime @updatedAt
 }
 
-// ─── Notifications ────────────────────────────────────────────────────────────
+//  Notifications 
 
 model Notification {
   id        String   @id @default(uuid())
@@ -216,7 +216,7 @@ model Notification {
   @@index([studentId, isRead])
 }
 
-// ─── Notice Board ─────────────────────────────────────────────────────────────
+//  Notice Board 
 
 model Notice {
   id        String   @id @default(uuid())
@@ -229,7 +229,7 @@ model Notice {
   createdAt DateTime @default(now())
 }
 
-// ─── Audit Log ────────────────────────────────────────────────────────────────
+//  Audit Log 
 
 model AuditLog {
   id         String   @id @default(uuid())
