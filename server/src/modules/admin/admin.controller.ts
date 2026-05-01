@@ -7,7 +7,7 @@ import { Parser } from 'json2csv';
 import { z } from 'zod';
 import { handleError } from '../../middleware/errorHandler.middleware';
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+//  helpers 
 const s = (v: unknown): string => String(v ?? '');
 const n = (v: unknown): number => Number(v);
 
@@ -20,7 +20,7 @@ const audit = (actor: Actor, action: string, entityType: string, entityId: strin
 
 const actor = (req: Request): Actor => ({ id: s((req as any).user?.id), name: s((req as any).user?.name) });
 
-// ─── Admin setup ──────────────────────────────────────────────────────────────
+//  Admin setup 
 export const setupInitialAdmin = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body as { name: string; email: string; password: string };
@@ -32,7 +32,7 @@ export const setupInitialAdmin = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Warden management ────────────────────────────────────────────────────────
+//  Warden management 
 export const createWarden = async (req: Request, res: Response) => {
   try {
     const { name, email, password, hostelId } = req.body as { name: string; email: string; password: string; hostelId?: string };
@@ -56,7 +56,7 @@ export const deleteWarden = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Hostel CRUD ──────────────────────────────────────────────────────────────
+//  Hostel CRUD 
 const hostelSchema = z.object({
   name: z.string().min(1),
   gender: z.enum(['male', 'female', 'mixed']),
@@ -97,7 +97,7 @@ export const getHostels = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Room CRUD ────────────────────────────────────────────────────────────────
+//  Room CRUD 
 export const createRooms = async (req: Request, res: Response) => {
   try {
     const { hostelId, rooms } = req.body as { hostelId: string; rooms: any[] };
@@ -193,7 +193,7 @@ export const bulkUploadRooms = async (req: Request, res: Response) => {
     .on('error', (err: any) => { fs.unlinkSync(filePath); res.status(400).json({ message: 'CSV error', error: err.message }); });
 };
 
-// ─── Hostel Restrictions ──────────────────────────────────────────────────────
+//  Hostel Restrictions 
 export const createRestriction = async (req: Request, res: Response) => {
   try {
     const { hostelId, allowedYears, allowedGender, allowedPrograms, priorityOnlyUntil, notes } = req.body as {
@@ -228,7 +228,7 @@ export const deleteRestriction = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Allocation Windows ────────────────────────────────────────────────────────
+//  Allocation Windows 
 export const createAllocationWindow = async (req: Request, res: Response) => {
   try {
     const { name, gender, hostelId, opensAt, closesAt, allowedPrograms = [], allowedYears = [] } = req.body as {
@@ -289,7 +289,7 @@ export const deleteWindow = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Student CRUD ──────────────────────────────────────────────────────────────
+//  Student CRUD 
 export const getStudents = async (req: Request, res: Response) => {
   try {
     const search  = s(req.query.search  || '');
@@ -386,7 +386,7 @@ export const bulkImportStudents = async (req: Request, res: Response) => {
     .on('error', (err: any) => { fs.unlinkSync(filePath); res.status(400).json({ message: 'CSV parse error', error: err.message }); });
 };
 
-// ─── Teacher CRUD ─────────────────────────────────────────────────────────────
+//  Teacher CRUD 
 export const getTeachers = async (req: Request, res: Response) => {
   try {
     const teachers = await prisma.teacher.findMany({ orderBy: { employeeId: 'asc' }, include: { assignment: { include: { room: { include: { hostel: { select: { name: true } } } } } } } });
@@ -418,7 +418,7 @@ export const deleteTeacher = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Manual Override ──────────────────────────────────────────────────────────
+//  Manual Override 
 export const manualOverride = async (req: Request, res: Response) => {
   try {
     const { studentId, teacherId, roomId, windowId, notes, force = false } = req.body as {
@@ -462,7 +462,7 @@ export const unallocateRoom = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Dashboard Stats ──────────────────────────────────────────────────────────
+//  Dashboard Stats 
 export const getDashboardStats = async (req: Request, res: Response) => {
   try {
     const [totalStudents, totalRoomsResult, occupiedSeats, totalHostels, totalTeachers] = await Promise.all([
@@ -491,7 +491,7 @@ export const getAllocations = async (req: Request, res: Response) => {
   } catch (error: any) { handleError(error, req, res); }
 };
 
-// ─── Occupancy Report ─────────────────────────────────────────────────────────
+//  Occupancy Report 
 export const getOccupancyReport = async (req: Request, res: Response) => {
   try {
     const hostels = await prisma.hostel.findMany({
@@ -544,7 +544,7 @@ export const exportAllocations = async (req: Request, res: Response) => {
   res.header('Content-Type', 'text/csv').attachment('allocations_report.csv').send(parser.parse(rows));
 };
 
-// ─── Notice management ────────────────────────────────────────────────────────
+//  Notice management 
 export const createNotice = async (req: Request, res: Response) => {
   try {
     const { title, body, priority = 'info', hostelId, expiresAt } = req.body as { title: string; body: string; priority?: string; hostelId?: string; expiresAt: string };
