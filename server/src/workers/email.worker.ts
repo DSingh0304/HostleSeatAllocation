@@ -1,8 +1,8 @@
-import { Worker } from 'bullmq';
-import nodemailer from 'nodemailer';
-import redis from '../lib/redis';
-import logger from '../lib/logger';
-import dotenv from 'dotenv';
+import { Worker } from "bullmq";
+import nodemailer from "nodemailer";
+import redis from "../lib/redis";
+import logger from "../lib/logger";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -16,32 +16,36 @@ const transporter = nodemailer.createTransport({
 });
 
 export const initEmailWorker = () => {
-  const worker = new Worker('email_queue', async (job) => {
-    const { type, to, subject, body } = job.data;
-    
-    logger.info(`Sending email to ${to}: ${subject}`);
-    
-    try {
-      await transporter.sendMail({
-        from: '"ResidentIQ" <noreply@residentiq.com>',
-        to,
-        subject,
-        text: body,
-        html: `<p>${body}</p>`,
-      });
-    } catch (error) {
-      logger.error(`Failed to send email: ${error}`);
-      throw error;
-    }
-  }, {
-    connection: redis.duplicate()
-  });
+  const worker = new Worker(
+    "email_queue",
+    async (job) => {
+      const { to, subject, body } = job.data;
 
-  worker.on('completed', (job) => {
+      logger.info(`Sending email to ${to}: ${subject}`);
+
+      try {
+        await transporter.sendMail({
+          from: '"ResidentIQ" <noreply@residentiq.com>',
+          to,
+          subject,
+          text: body,
+          html: `<p>${body}</p>`,
+        });
+      } catch (error) {
+        logger.error(`Failed to send email: ${error}`);
+        throw error;
+      }
+    },
+    {
+      connection: redis.duplicate(),
+    },
+  );
+
+  worker.on("completed", (job) => {
     logger.info(`Job ${job.id} completed successfully`);
   });
 
-  worker.on('failed', (job, err) => {
+  worker.on("failed", (job, err) => {
     logger.error(`Job ${job?.id} failed with error ${err.message}`);
   });
 
