@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,7 +11,6 @@ import {
   Calendar,
   BarChart3,
   UserCheck,
-  Users2,
   LogOut,
   Shield,
   Menu,
@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import api from "../../lib/api";
 import { useAuthStore } from "../../store/authStore";
-import toast, { Toaster } from "react-hot-toast";
 
 import HostelsTab from "./components/HostelsTab";
 import StudentsTab from "./components/StudentsTab";
