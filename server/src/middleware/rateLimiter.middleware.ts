@@ -2,9 +2,13 @@ import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import redis from '../lib/redis';
 
+const isProd = process.env.NODE_ENV === 'production';
+const bookingMax = Number(process.env.BOOKING_RATE_LIMIT_MAX ?? (isProd ? 30 : 500));
+const authMax = Number(process.env.AUTH_RATE_LIMIT_MAX ?? (isProd ? 10 : 1000));
+
 export const bookingRateLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 500, // Disabled for dev (was 5)
+  max: Number.isFinite(bookingMax) ? bookingMax : 30,
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({
@@ -15,8 +19,8 @@ export const bookingRateLimiter = rateLimit({
 });
 
 export const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 1000, // Disabled for dev (was 10)
+  windowMs: 15 * 60 * 1000,
+  max: Number.isFinite(authMax) ? authMax : 10,
   store: new RedisStore({
     // @ts-ignore
     sendCommand: (...args: string[]) => redis.call(...args),

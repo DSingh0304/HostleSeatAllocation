@@ -124,6 +124,54 @@ const hostelSchema = z.object({
   address: z.string().optional(),
 });
 
+const studentSchema = z.object({
+  rollNumber: z.string().min(1),
+  name: z.string().min(1),
+  email: z.string().email(),
+  year: z.number().int().positive(),
+  branch: z.string().min(1),
+  program: z.enum(["btech", "mtech", "phd"]).default("btech"),
+  gender: z.enum(["male", "female"]).optional(),
+  phone: z.string().optional(),
+  priorityTier: z.number().int().min(0).default(0),
+});
+
+const teacherSchema = z.object({
+  employeeId: z.string().min(1),
+  name: z.string().min(1),
+  email: z.string().email(),
+  gender: z.enum(["male", "female"]),
+  department: z.string().min(1),
+  phone: z.string().optional(),
+});
+
+const restrictionSchema = z.object({
+  hostelId: z.string().min(1),
+  allowedYears: z.array(z.number().int().positive()).default([]),
+  allowedGender: z.enum(["male", "female", "mixed"]).optional(),
+  allowedPrograms: z.array(z.string()).default([]),
+  priorityOnlyUntil: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+const windowSchema = z.object({
+  name: z.string().min(1),
+  gender: z.enum(["male", "female", "mixed"]),
+  hostelId: z.string().optional(),
+  opensAt: z.string().min(1),
+  closesAt: z.string().min(1),
+  allowedPrograms: z.array(z.string()).default([]),
+  allowedYears: z.array(z.number().int().positive()).default([]),
+});
+
+const noticeSchema = z.object({
+  title: z.string().min(1),
+  body: z.string().min(1),
+  priority: z.enum(["info", "warning", "urgent"]).default("info"),
+  hostelId: z.string().optional(),
+  expiresAt: z.string().min(1),
+});
+
 export const createHostel = async (req: Request, res: Response) => {
   try {
     const body = { ...req.body, totalRooms: n(req.body.totalRooms) };
@@ -355,6 +403,16 @@ export const bulkUploadRooms = async (req: Request, res: Response) => {
 //  Hostel Restrictions
 export const createRestriction = async (req: Request, res: Response) => {
   try {
+    const body = {
+      ...req.body,
+      allowedYears: Array.isArray(req.body.allowedYears)
+        ? req.body.allowedYears.map(n)
+        : [],
+    };
+    const parsed = restrictionSchema.safeParse(body);
+    if (!parsed.success)
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+
     const {
       hostelId,
       allowedYears,
@@ -362,14 +420,7 @@ export const createRestriction = async (req: Request, res: Response) => {
       allowedPrograms,
       priorityOnlyUntil,
       notes,
-    } = req.body as {
-      hostelId: string;
-      allowedYears: number[];
-      allowedGender?: string;
-      allowedPrograms?: string[];
-      priorityOnlyUntil?: string;
-      notes?: string;
-    };
+    } = parsed.data;
     const restriction = await prisma.hostelRestriction.create({
       data: {
         hostelId,
@@ -433,31 +484,29 @@ export const deleteRestriction = async (req: Request, res: Response) => {
 //  Allocation Windows
 export const createAllocationWindow = async (req: Request, res: Response) => {
   try {
+    const body = {
+      ...req.body,
+      allowedYears: Array.isArray(req.body.allowedYears)
+        ? req.body.allowedYears.map(n)
+        : [],
+      allowedPrograms: Array.isArray(req.body.allowedPrograms)
+        ? req.body.allowedPrograms
+        : [],
+    };
+    const parsed = windowSchema.safeParse(body);
+    if (!parsed.success)
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+
     const {
       name,
       gender,
       hostelId,
       opensAt,
       closesAt,
-      allowedPrograms = [],
-      allowedYears = [],
-    } = req.body as {
-      name: string;
-      gender: string;
-      hostelId?: string;
-      opensAt: string;
-      closesAt: string;
-      allowedPrograms?: string[];
-      allowedYears?: number[];
-    };
-    if (!name || !gender || !opensAt || !closesAt)
-      return res
-        .status(400)
-        .json({ message: "name, gender, opensAt, closesAt are required" });
-    if (!["male", "female", "mixed"].includes(gender))
-      return res
-        .status(400)
-        .json({ message: "gender must be male, female, or mixed" });
+      allowedPrograms,
+      allowedYears,
+    } = parsed.data;
+
     if (new Date(opensAt) >= new Date(closesAt))
       return res
         .status(400)
@@ -604,33 +653,27 @@ export const getStudents = async (req: Request, res: Response) => {
 
 export const createStudent = async (req: Request, res: Response) => {
   try {
+    const body = {
+      ...req.body,
+      year: n(req.body.year),
+      priorityTier: n(req.body.priorityTier ?? 0),
+    };
+    const parsed = studentSchema.safeParse(body);
+    if (!parsed.success)
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+
     const {
       rollNumber,
       name,
       email,
       year,
       branch,
-      program = "btech",
+      program,
       gender,
       phone,
-      priorityTier = 0,
-    } = req.body as {
-      rollNumber: string;
-      name: string;
-      email: string;
-      year: number;
-      branch: string;
-      program?: string;
-      gender?: string;
-      phone?: string;
-      priorityTier?: number;
-    };
-    if (!rollNumber || !name || !email || !year || !branch)
-      return res
-        .status(400)
-        .json({
-          message: "rollNumber, name, email, year, and branch are required",
-        });
+      priorityTier,
+    } = parsed.data;
+
     const passwordHash = await bcrypt.hash(`${rollNumber}@iiituna`, 10);
     const student = await prisma.student.create({
       data: {
@@ -642,7 +685,7 @@ export const createStudent = async (req: Request, res: Response) => {
         program,
         gender: gender ?? null,
         phone: phone ?? null,
-        priorityTier: n(priorityTier),
+        priorityTier,
         passwordHash,
         mustChangePassword: true,
         onboardingDone: false,
@@ -814,20 +857,11 @@ export const getTeachers = async (req: Request, res: Response) => {
 
 export const createTeacher = async (req: Request, res: Response) => {
   try {
-    const { employeeId, name, email, gender, department, phone } = req.body as {
-      employeeId: string;
-      name: string;
-      email: string;
-      gender: string;
-      department: string;
-      phone?: string;
-    };
-    if (!employeeId || !name || !email || !gender || !department)
-      return res
-        .status(400)
-        .json({
-          message: "employeeId, name, email, gender, department are required",
-        });
+    const parsed = teacherSchema.safeParse(req.body);
+    if (!parsed.success)
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+
+    const { employeeId, name, email, gender, department, phone } = parsed.data;
     const passwordHash = await bcrypt.hash(`${employeeId}@iiituna`, 10);
     const teacher = await prisma.teacher.create({
       data: {
@@ -1020,12 +1054,24 @@ export const getAllocations = async (req: Request, res: Response) => {
     const search = s(req.query.search || "");
     const where: any = { status: "confirmed" };
     if (search)
-      where.student = {
-        OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { rollNumber: { contains: search, mode: "insensitive" } },
-        ],
-      };
+      where.OR = [
+        {
+          student: {
+            OR: [
+              { name: { contains: search, mode: "insensitive" } },
+              { rollNumber: { contains: search, mode: "insensitive" } },
+            ],
+          },
+        },
+        {
+          teacher: {
+            OR: [
+              { name: { contains: search, mode: "insensitive" } },
+              { employeeId: { contains: search, mode: "insensitive" } },
+            ],
+          },
+        },
+      ];
     const [allocations, total] = await Promise.all([
       prisma.roomAssignment.findMany({
         where,
@@ -1153,23 +1199,17 @@ export const exportAllocations = async (req: Request, res: Response) => {
 //  Notice management
 export const createNotice = async (req: Request, res: Response) => {
   try {
+    const parsed = noticeSchema.safeParse(req.body);
+    if (!parsed.success)
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+
     const {
       title,
       body,
-      priority = "info",
+      priority,
       hostelId,
       expiresAt,
-    } = req.body as {
-      title: string;
-      body: string;
-      priority?: string;
-      hostelId?: string;
-      expiresAt: string;
-    };
-    if (!title || !body || !expiresAt)
-      return res
-        .status(400)
-        .json({ message: "title, body, expiresAt are required" });
+    } = parsed.data;
     const notice = await prisma.notice.create({
       data: {
         title,
