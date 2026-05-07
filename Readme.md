@@ -9,12 +9,12 @@ ResidentIQ provides transparent, role-based room allocation with real-time updat
 - Fair and transparent room allocation workflows
 - Role-based access for students, wardens, superadmins, and teachers
 - Allocation windows with activation/locking controls
-- Real-time availability and booking updates
+- Near real-time availability and booking updates (polling)
 - Roommate invite and preference flows
 - Manual override support for administrative exceptions
 - Occupancy reports and export-ready data
 - Audit logging for critical actions
-- CI pipeline and containerized local environment
+- Containerized local environment
 
 ## System Overview
 
@@ -23,7 +23,7 @@ ResidentIQ provides transparent, role-based room allocation with real-time updat
 - Tailwind CSS for UI styling
 - Zustand for client-side auth state
 - Axios for API calls
-- Socket.IO client for live updates
+- REST API polling for live updates
 
 ### Backend
 - Express + TypeScript
@@ -36,7 +36,7 @@ ResidentIQ provides transparent, role-based room allocation with real-time updat
 ### Infrastructure
 - Docker Compose for API + PostgreSQL + Redis + Nginx
 - Nginx reverse proxy config included
-- GitHub Actions CI for build and tests
+- Docker Compose for local environment
 
 ## Repository Structure
 
@@ -47,8 +47,8 @@ HostelSeatAllocation/
     prisma/                # Data schema
     src/modules/           # Feature modules (auth, admin, student, allocation, etc.)
     src/middleware/        # Security, rate limit, audit, error handling
-    src/lib/               # Prisma, Redis, logger, sockets, queues
-  .github/workflows/       # CI pipeline
+    src/lib/               # Prisma, Redis, logger, queues
+  # .github/workflows/       # CI pipeline (add if needed)
   docker-compose.yml       # Local multi-service stack
   nginx.conf               # Reverse proxy
   start.sh                 # One-command local startup
