@@ -39,6 +39,13 @@ export const bookRoom = async (studentId: string, roomId: string, windowId: stri
     throw new Error('Gender not set. Please complete your profile first');
   }
 
+  const windowAllowsGender = window.gender === 'mixed' || window.gender === student.gender;
+  const windowAllowsProgram = window.allowedPrograms.length === 0 || window.allowedPrograms.includes(student.program);
+  const windowAllowsYear = window.allowedYears.length === 0 || window.allowedYears.includes(student.year);
+  if (!windowAllowsGender || !windowAllowsProgram || !windowAllowsYear) {
+    throw new Error('You are not eligible for this allocation window');
+  }
+
 
 
   // 2. Verify student hasn't already booked
@@ -56,6 +63,10 @@ export const bookRoom = async (studentId: string, roomId: string, windowId: stri
   });
   if (!room) throw new Error('Room not found');
   if (room.status === 'maintenance') throw new Error('This room is under maintenance');
+
+  if (window.hostelId && window.hostelId !== room.hostelId) {
+    throw new Error('This room is not part of the current allocation window');
+  }
 
   // Hostel-level gender check
   if (room.hostel.gender !== 'mixed' && room.hostel.gender !== student.gender) {

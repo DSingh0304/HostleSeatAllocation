@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import prisma from '../../lib/prisma';
-import redis from '../../lib/redis';
 import { bookRoom } from './allocation.service';
 import bcrypt from 'bcryptjs';
 
@@ -25,11 +24,13 @@ describe('Allocation Service Race Condition Tests', () => {
     // 2. Create an allocation window (opens in past, closes in future)
     const window = await prisma.allocationWindow.create({
       data: {
-        academicYear: '2025-26',
         name: 'Test Window Concurrent',
+        gender: 'male',
         opensAt: new Date(Date.now() - 3600 * 1000), // 1 hour ago
         closesAt: new Date(Date.now() + 3600 * 1000), // 1 hour later
-        isActive: true
+        isActive: true,
+        allowedPrograms: [],
+        allowedYears: [1, 2, 3, 4]
       }
     });
     windowId = window.id;
@@ -38,10 +39,9 @@ describe('Allocation Service Race Condition Tests', () => {
     await prisma.hostelRestriction.create({
       data: {
         hostelId,
-        academicYear: '2025-26',
         allowedYears: [1, 2, 3, 4],
         allowedGender: 'male',
-        allowedBranches: [], // any
+        allowedPrograms: []
       }
     });
 
@@ -49,10 +49,8 @@ describe('Allocation Service Race Condition Tests', () => {
     const room = await prisma.room.create({
       data: {
         hostelId,
-        floor: 1,
         roomNumber: 'T1-100',
-        capacity: 1,
-        type: 'non_ac'
+        capacity: 1
       }
     });
     roomId = room.id;
@@ -68,6 +66,9 @@ describe('Allocation Service Race Condition Tests', () => {
           gender: 'male',
           year: 2,
           branch: 'CSE',
+          program: 'btech',
+          onboardingDone: true,
+          mustChangePassword: false,
           passwordHash,
           priorityTier: 0,
         }
