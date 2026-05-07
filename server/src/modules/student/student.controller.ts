@@ -1,11 +1,36 @@
 import { Request, Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware";
 import prisma from "../../lib/prisma";
-import redis from "../../lib/redis";
 import { handleError } from "../../middleware/errorHandler.middleware";
 
 const s = (v: unknown): string => String(v ?? "");
 const n = (v: unknown): number => Number(v);
+
+const assertWindowEligibility = (window: any, student: any, roomHostelId?: string) => {
+  if (!window || !window.isActive) {
+    throw new Error("Allocation window is not active");
+  }
+
+  const now = new Date();
+  if (now < window.opensAt || now > window.closesAt) {
+    throw new Error("Allocation window is closed");
+  }
+
+  if (window.lockedAt && now > window.lockedAt) {
+    throw new Error("Allocations are locked. Contact your warden for changes.");
+  }
+
+  const windowAllowsGender = window.gender === "mixed" || window.gender === student.gender;
+  const windowAllowsProgram = window.allowedPrograms.length === 0 || window.allowedPrograms.includes(student.program);
+  const windowAllowsYear = window.allowedYears.length === 0 || window.allowedYears.includes(student.year);
+  if (!windowAllowsGender || !windowAllowsProgram || !windowAllowsYear) {
+    throw new Error("You are not eligible for this allocation window");
+  }
+
+  if (roomHostelId && window.hostelId && window.hostelId !== roomHostelId) {
+    throw new Error("This room is not part of the current allocation window");
+  }
+};
 
 //  Profile
 export const getProfile = async (req: AuthRequest, res: Response) => {
@@ -251,6 +276,8 @@ export const sendInvite = async (req: AuthRequest, res: Response) => {
       prisma.student.findUnique({ where: { id: senderId } }),
       prisma.student.findUnique({ where: { rollNumber: receiverRollNumber } }),
     ]);
+    if (!sender)
+      return res.status(404).json({ message: "Sender not found" });
     if (!receiver)
       return res
         .status(404)
@@ -290,18 +317,30 @@ export const sendInvite = async (req: AuthRequest, res: Response) => {
             "You already have a pending invite to this student for this room",
         });
 
-    const room = await prisma.room.findUnique({
-      where: { id: roomId },
-      include: { hostel: { select: { name: true } } },
-    });
+    const [room, window] = await Promise.all([
+      prisma.room.findUnique({
+        where: { id: roomId },
+        include: { hostel: { select: { name: true, id: true } } },
+      }),
+      prisma.allocationWindow.findUnique({ where: { id: windowId } }),
+    ]);
     if (!room) return res.status(404).json({ message: "Room not found" });
+    if (room.status === "maintenance")
+      return res.status(400).json({ message: "Room is under maintenance" });
+
+    try {
+      assertWindowEligibility(window, sender, room.hostelId);
+      assertWindowEligibility(window, receiver, room.hostelId);
+    } catch (err: any) {
+      return res.status(400).json({ message: err.message });
+    }
 
     const currentOccupants = await prisma.roomAssignment.count({
       where: { roomId, status: "confirmed" },
     });
-    const pendingHolds = await redis
-      .get(`invite_hold:${roomId}`)
-      .then((v) => n(v ?? 0));
+    const pendingInvites = await prisma.roommateInvite.count({
+      where: { roomId, status: "pending", expiresAt: { gt: new Date() } },
+    });
     // Find ANY existing assignment for the sender (confirmed, cancelled, etc.)
     const senderAssignment = await prisma.roomAssignment.findUnique({
       where: { studentId: senderId },
@@ -310,9 +349,18 @@ export const sendInvite = async (req: AuthRequest, res: Response) => {
       senderAssignment?.roomId === roomId &&
       senderAssignment?.status === "confirmed";
 
+    if (
+      senderAssignment?.status === "confirmed" &&
+      senderAssignment.roomId !== roomId
+    ) {
+      return res
+        .status(409)
+        .json({ message: "You already have a confirmed room allocation" });
+    }
+
     // Check if adding one more invitee (and potentially the sender) exceeds capacity
     if (
-      currentOccupants + pendingHolds + (isSenderAlreadyInRoom ? 0 : 1) >=
+      currentOccupants + pendingInvites + (isSenderAlreadyInRoom ? 0 : 1) >=
       room.capacity
     ) {
       return res
@@ -322,9 +370,6 @@ export const sendInvite = async (req: AuthRequest, res: Response) => {
             "Room is full or has too many pending invites for its capacity",
         });
     }
-
-    await redis.incr(`invite_hold:${roomId}`);
-    await redis.expire(`invite_hold:${roomId}`, 30 * 60);
 
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     const invite = await prisma.roommateInvite.create({
@@ -391,6 +436,24 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
         .status(404)
         .json({ message: "Invite not found or already responded to" });
 
+    if (new Date() > invite.expiresAt) {
+      await prisma.roommateInvite.update({
+        where: { id: inviteId },
+        data: { status: "expired" },
+      });
+      return res.status(410).json({ message: "This invite has expired" });
+    }
+
+    const receiver = await prisma.student.findUnique({
+      where: { id: studentId },
+    });
+    if (!receiver) return res.status(404).json({ message: "Student not found" });
+    if (!receiver.gender) {
+      return res
+        .status(400)
+        .json({ message: "Gender not set. Please complete your profile first" });
+    }
+
     const activeAssignment = await prisma.roomAssignment.findFirst({
       where: { studentId, status: "confirmed" },
     });
@@ -400,13 +463,47 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
           "You already have a confirmed room. Cancel your allocation before responding to invites.",
       });
     }
-    if (new Date() > invite.expiresAt) {
-      await prisma.roommateInvite.update({
-        where: { id: inviteId },
-        data: { status: "expired" },
+
+    const [room, window] = await Promise.all([
+      prisma.room.findUnique({
+        where: { id: invite.roomId },
+        include: { hostel: { include: { restrictions: true } } },
+      }),
+      prisma.allocationWindow.findUnique({ where: { id: invite.windowId } }),
+    ]);
+
+    if (!room) return res.status(404).json({ message: "Room no longer exists" });
+    if (room.status === "maintenance")
+      return res.status(400).json({ message: "Room is under maintenance" });
+
+    try {
+      assertWindowEligibility(window, receiver, room.hostelId);
+    } catch (err: any) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    if (room.hostel.gender !== "mixed" && room.hostel.gender !== receiver.gender) {
+      return res
+        .status(400)
+        .json({ message: `This hostel is for ${room.hostel.gender}s only` });
+    }
+
+    if (room.allowedGender && room.allowedGender !== receiver.gender) {
+      return res
+        .status(400)
+        .json({ message: `This room is restricted to ${room.allowedGender}s only` });
+    }
+
+    if (room.hostel.restrictions.length > 0) {
+      const hasMatchingRestriction = room.hostel.restrictions.some((r) => {
+        const yearOk = r.allowedYears.length === 0 || r.allowedYears.includes(receiver.year);
+        const programOk = r.allowedPrograms.length === 0 || r.allowedPrograms.includes(receiver.program);
+        const genderOk = !r.allowedGender || r.allowedGender === receiver.gender;
+        return yearOk && programOk && genderOk;
       });
-      await redis.decr(`invite_hold:${invite.roomId}`);
-      return res.status(410).json({ message: "This invite has expired" });
+      if (!hasMatchingRestriction) {
+        return res.status(400).json({ message: "You are not eligible to join this room" });
+      }
     }
 
     if (action === "decline") {
@@ -414,17 +511,13 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
         where: { id: inviteId },
         data: { status: "declined" },
       });
-      await redis.decr(`invite_hold:${invite.roomId}`);
-      const receiver = await prisma.student.findUnique({
-        where: { id: studentId },
-      });
       await prisma.notification
         .create({
           data: {
             studentId: invite.senderId,
             type: "invite_declined",
             title: "Roommate Invite Declined",
-            body: `${receiver!.name} declined your roommate invite.`,
+            body: `${receiver.name} declined your roommate invite.`,
             metadata: { inviteId },
           },
         })
@@ -433,12 +526,6 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
     }
 
     if (action === "accept") {
-      const room = await prisma.room.findUnique({
-        where: { id: invite.roomId },
-        include: { hostel: { select: { name: true } } },
-      });
-      if (!room)
-        return res.status(404).json({ message: "Room no longer exists" });
       const occupants = await prisma.roomAssignment.count({
         where: { roomId: invite.roomId, status: "confirmed" },
       });
@@ -454,14 +541,14 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
           windowId: invite.windowId,
           status: "confirmed",
           bookedAt: new Date(),
-          notes: `Joined via roommate invite`,
+          notes: "Joined via roommate invite",
         },
         update: {
           roomId: invite.roomId,
           windowId: invite.windowId,
           status: "confirmed",
           bookedAt: new Date(),
-          notes: `Joined via roommate invite`,
+          notes: "Joined via roommate invite",
         },
       });
 
@@ -469,6 +556,17 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
       const senderAssignment = await prisma.roomAssignment.findUnique({
         where: { studentId: invite.senderId },
       });
+
+      if (
+        senderAssignment?.status === "confirmed" &&
+        senderAssignment.roomId !== invite.roomId
+      ) {
+        return res.status(409).json({
+          message:
+            "Invite sender already has a confirmed room allocation. Ask them to cancel before accepting.",
+        });
+      }
+
       if (
         senderAssignment?.roomId !== invite.roomId ||
         senderAssignment?.status !== "confirmed"
@@ -481,14 +579,14 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
             windowId: invite.windowId,
             status: "confirmed",
             bookedAt: new Date(),
-            notes: `Group leader - Joined after first acceptance`,
+            notes: "Group leader - Joined after first acceptance",
           },
           update: {
             roomId: invite.roomId,
             windowId: invite.windowId,
             status: "confirmed",
             bookedAt: new Date(),
-            notes: `Group leader - Joined after first acceptance`,
+            notes: "Group leader - Joined after first acceptance",
           },
         });
       }
@@ -497,18 +595,13 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
         where: { id: inviteId },
         data: { status: "accepted" },
       });
-      await redis.decr(`invite_hold:${invite.roomId}`);
-
-      const receiver = await prisma.student.findUnique({
-        where: { id: studentId },
-      });
       await prisma.notification
         .create({
           data: {
             studentId: invite.senderId,
             type: "invite_accepted",
             title: "Roommate Invite Accepted!",
-            body: `${receiver!.name} accepted your invite and will share Room ${room.roomNumber} in ${room.hostel.name}!`,
+            body: `${receiver.name} accepted your invite and will share Room ${room.roomNumber} in ${room.hostel.name}!`,
             metadata: { inviteId },
           },
         })
@@ -518,6 +611,7 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
         message: `Successfully joined Room ${room.roomNumber} in ${room.hostel.name}`,
       });
     }
+
     return res
       .status(400)
       .json({ message: "action must be accept or decline" });

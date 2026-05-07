@@ -25,7 +25,7 @@ export const initEmailWorker = () => {
 
       try {
         await transporter.sendMail({
-          from: '"ResidentIQ" <noreply@residentiq.com>',
+          from: process.env.SMTP_FROM || '"ResidentIQ" <noreply@residentiq.com>',
           to,
           subject,
           text: body,
