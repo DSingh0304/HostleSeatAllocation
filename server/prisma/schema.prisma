@@ -31,8 +31,6 @@ model Student {
   invitesSent     RoommateInvite[] @relation("InviteSender")
   invitesReceived RoommateInvite[] @relation("InviteReceiver")
   notifications   Notification[]
-  swapsRequested  SwapRequest[]    @relation("SwapRequester")
-  swapsReceived   SwapRequest[]    @relation("SwapTarget")
   preference      RoomPreference?
 }
 
@@ -170,20 +168,6 @@ model RoommateInvite {
 }
 
 //  Swap Requests 
-
-model SwapRequest {
-  id          String    @id @default(uuid())
-  requesterId String
-  requester   Student   @relation("SwapRequester", fields: [requesterId], references: [id], onDelete: Cascade)
-  targetId    String
-  target      Student   @relation("SwapTarget",    fields: [targetId],    references: [id], onDelete: Cascade)
-  status      String    @default("pending") // pending | accepted | declined | expired
-  expiresAt   DateTime
-  createdAt   DateTime  @default(now())
-  resolvedAt  DateTime?
-
-  @@index([targetId])
-}
 
 
 //  Room Preferences 
