@@ -9,7 +9,6 @@ import allocationRoutes from './modules/allocation/allocation.routes';
 import adminRoutes from './modules/admin/admin.routes';
 import studentRoutes from './modules/student/student.routes';
 import { createServer } from 'http';
-import { initSocket } from './lib/socket';
 import { initEmailWorker } from './workers/email.worker';
 import prisma from './lib/prisma';
 import redis from './lib/redis';
@@ -45,17 +44,32 @@ cron.schedule('* * * * *', async () => {
       },
       data: { isActive: false }
     });
+
+    // Auto-open rooms whose private window has expired
+    await prisma.room.updateMany({
+      where: {
+        isPublic: false,
+        privateUntil: { lte: now },
+      },
+      data: { isPublic: true, privateUntil: null },
+    });
   } catch (err: any) {
     logger.error(`Window cron job failed: ${err.message}`);
   }
 });
+
+if (process.env.TRUST_PROXY) {
+  app.set('trust proxy', process.env.TRUST_PROXY);
+} else if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
 app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3001',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '1mb' }));
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
@@ -79,7 +93,6 @@ app.get('/health', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 const httpServer = createServer(app);
-initSocket(httpServer);
 initEmailWorker();
 
 httpServer.listen(PORT, () => {
