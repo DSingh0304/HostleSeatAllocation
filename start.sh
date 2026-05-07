@@ -84,11 +84,15 @@ step "Syncing Prisma schema to database…"
 cd "$SERVER_DIR"
 
 # Use .env.local for host machine Prisma commands (localhost instead of postgres)
-export $(grep -v '^#' .env.local | xargs)
-
-# `db push` is non-interactive and handles destructive changes automatically.
-# It's the right tool for development  no migration files needed.
-npx prisma db push --accept-data-loss 2>&1 | tail -6
+if [[ "${NODE_ENV:-}" == "production" ]]; then
+  export $(grep -v '^#' .env | xargs)
+  npx prisma migrate deploy 2>&1 | tail -6
+else
+  export $(grep -v '^#' .env.local | xargs)
+  # `db push` is non-interactive and handles destructive changes automatically.
+  # It's the right tool for development  no migration files needed.
+  npx prisma db push --accept-data-loss 2>&1 | tail -6
+fi
 ok "Database schema synced"
 
 # 5. Regenerate Prisma Client 
