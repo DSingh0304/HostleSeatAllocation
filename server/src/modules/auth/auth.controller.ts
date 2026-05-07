@@ -236,11 +236,49 @@ export const refresh = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid refresh token" });
     }
 
+    let user: { id: string; role: string; name?: string; email?: string; mustChangePassword?: boolean; onboardingDone?: boolean } | null = null;
+    if (decoded.role === 'student') {
+      const student = await prisma.student.findUnique({ where: { id: decoded.userId } });
+      if (student) {
+        user = {
+          id: student.id,
+          role: 'student',
+          name: student.name,
+          email: student.email,
+          mustChangePassword: student.mustChangePassword,
+          onboardingDone: student.onboardingDone,
+        };
+      }
+    } else if (decoded.role === 'teacher') {
+      const teacher = await prisma.teacher.findUnique({ where: { id: decoded.userId } });
+      if (teacher) {
+        user = {
+          id: teacher.id,
+          role: 'teacher',
+          name: teacher.name,
+          email: teacher.email,
+          mustChangePassword: teacher.mustChangePassword,
+        };
+      }
+    } else {
+      const admin = await prisma.admin.findUnique({ where: { id: decoded.userId } });
+      if (admin) {
+        user = {
+          id: admin.id,
+          role: admin.role,
+          name: admin.name,
+          email: admin.email,
+        };
+      }
+    }
+
+    if (!user) {
+      await revokeRefreshToken(refreshToken);
+      return res.status(401).json({ message: 'User no longer exists' });
+    }
+
     await revokeRefreshToken(refreshToken);
-    const tokens = await generateTokens({
-      id: decoded.userId,
-      role: decoded.role,
-    });
+    const tokens = await generateTokens(user);
     res.json(tokens);
   } catch (error: any) {
     res.status(400).json({ message: error.message });

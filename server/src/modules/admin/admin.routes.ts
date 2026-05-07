@@ -16,7 +16,10 @@ import {
   createNotice, getNotices, deleteNotice,
 } from './admin.controller';
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 const router = Router();
 
 const SA = ['superadmin'];
