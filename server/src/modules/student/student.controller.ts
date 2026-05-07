@@ -390,6 +390,16 @@ export const respondToInvite = async (req: AuthRequest, res: Response) => {
       return res
         .status(404)
         .json({ message: "Invite not found or already responded to" });
+
+    const activeAssignment = await prisma.roomAssignment.findFirst({
+      where: { studentId, status: "confirmed" },
+    });
+    if (activeAssignment) {
+      return res.status(409).json({
+        message:
+          "You already have a confirmed room. Cancel your allocation before responding to invites.",
+      });
+    }
     if (new Date() > invite.expiresAt) {
       await prisma.roommateInvite.update({
         where: { id: inviteId },

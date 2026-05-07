@@ -166,13 +166,17 @@ function InviteModal({ room, windowId, onClose, onBook, onRefresh }: { room: any
 }
 
 //  Pending Invites Banner 
-function PendingInvites({ received, sent, onRefresh }: { received: any[]; sent: any[]; onRefresh: () => void }) {
+function PendingInvites({ received, sent, onRefresh, responseLocked }: { received: any[]; sent: any[]; onRefresh: () => void; responseLocked: boolean }) {
   const pendingReceived = received.filter((i: any) => i.status === 'pending');
   const pendingSent = sent.filter((i: any) => i.status === 'pending');
   
   if (!pendingReceived.length && !pendingSent.length) return null;
 
   const respond = async (inviteId: string, action: 'accept' | 'decline') => {
+    if (responseLocked) {
+      toast.error('You already have a room. Cancel your allocation to respond to invites.');
+      return;
+    }
     try { const { data } = await api.post(`/student/invites/${inviteId}/respond`, { action }); toast.success(data.message); onRefresh(); }
     catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
   };
@@ -190,10 +194,25 @@ function PendingInvites({ received, sent, onRefresh }: { received: any[]; sent: 
                 <div>
                   <p className="font-bold text-sm">{inv.sender?.name} ({inv.sender?.rollNumber}) invited you</p>
                   <p className="text-xs text-foreground/40">Expires in {getExpiry(inv.expiresAt)} min</p>
+                  {responseLocked && (
+                    <p className="text-xs text-foreground/40 mt-1">Leave your current room to respond.</p>
+                  )}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => respond(inv.id, 'accept')} className="flex items-center gap-1 px-4 py-2 bg-green-500/10 text-green-500 rounded-xl font-bold text-sm hover:bg-green-500/20 transition-colors"><Check className="w-4 h-4" /> Accept</button>
-                  <button onClick={() => respond(inv.id, 'decline')} className="flex items-center gap-1 px-4 py-2 bg-red-500/10 text-red-500 rounded-xl font-bold text-sm hover:bg-red-500/20 transition-colors"><Ban className="w-4 h-4" /> Decline</button>
+                  <button
+                    onClick={() => respond(inv.id, 'accept')}
+                    disabled={responseLocked}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-xl font-bold text-sm transition-colors ${responseLocked ? 'bg-green-500/5 text-green-500/40 cursor-not-allowed' : 'bg-green-500/10 text-green-500 hover:bg-green-500/20'}`}
+                  >
+                    <Check className="w-4 h-4" /> Accept
+                  </button>
+                  <button
+                    onClick={() => respond(inv.id, 'decline')}
+                    disabled={responseLocked}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-xl font-bold text-sm transition-colors ${responseLocked ? 'bg-red-500/5 text-red-500/40 cursor-not-allowed' : 'bg-red-500/10 text-red-500 hover:bg-red-500/20'}`}
+                  >
+                    <Ban className="w-4 h-4" /> Decline
+                  </button>
                 </div>
               </div>
             ))}
@@ -427,7 +446,12 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        <PendingInvites received={receivedInvites} sent={sentInvites} onRefresh={() => { loadAll(true); loadBooking(); }} />
+        <PendingInvites
+          received={receivedInvites}
+          sent={sentInvites}
+          onRefresh={() => { loadAll(true); loadBooking(); }}
+          responseLocked={profile?.assignment?.status === 'confirmed'}
+        />
 
         {/* Tabs */}
         <div className="flex gap-2 mb-8">
