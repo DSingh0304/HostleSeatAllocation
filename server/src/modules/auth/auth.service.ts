@@ -3,7 +3,10 @@ import bcrypt from 'bcryptjs';
 import redis from '../../lib/redis';
 import { randomUUID } from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey123';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required');
+}
 
 interface TokenPayload {
   id: string;
