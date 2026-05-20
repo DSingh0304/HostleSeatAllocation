@@ -147,7 +147,7 @@ const teacherSchema = z.object({
 
 const restrictionSchema = z.object({
   hostelId: z.string().min(1),
-  allowedYears: z.array(z.number().int().positive()).default([]),
+  allowedYears: z.array(z.number()).default([]),
   allowedGender: z.enum(["male", "female", "mixed"]).optional(),
   allowedPrograms: z.array(z.string()).default([]),
   priorityOnlyUntil: z.string().optional(),
@@ -161,7 +161,7 @@ const windowSchema = z.object({
   opensAt: z.string().min(1),
   closesAt: z.string().min(1),
   allowedPrograms: z.array(z.string()).default([]),
-  allowedYears: z.array(z.number().int().positive()).default([]),
+  allowedYears: z.array(z.number()).default([]),
 });
 
 const noticeSchema = z.object({
@@ -178,6 +178,15 @@ export const createHostel = async (req: Request, res: Response) => {
     const parsed = hostelSchema.safeParse(body);
     if (!parsed.success)
       return res.status(400).json({ message: parsed.error.issues[0].message });
+    
+    // Check if hostel with same name already exists
+    const existing = await prisma.hostel.findFirst({
+      where: { name: parsed.data.name }
+    });
+    if (existing) {
+      return res.status(409).json({ message: `Hostel with name '${parsed.data.name}' already exists` });
+    }
+    
     const hostel = await prisma.hostel.create({ data: parsed.data });
     audit(actor(req), "CREATE_HOSTEL", "Hostel", hostel.id);
     res.status(201).json(hostel);
@@ -233,9 +242,14 @@ export const getHostels = async (req: Request, res: Response) => {
 export const createRooms = async (req: Request, res: Response) => {
   try {
     const { hostelId, rooms } = req.body as { hostelId: string; rooms: any[] };
-    const created = await prisma.room.createMany({
-      data: rooms.map((r: any) => ({ ...r, hostelId })),
-    });
+    const created = await Promise.all(
+      rooms.map((r: any) => {
+        if (r.capacity < 1) throw new Error("Room capacity must be at least 1");
+        return prisma.room.create({
+          data: { ...r, hostelId },
+        });
+      })
+    );
     res.status(201).json(created);
   } catch (error: any) {
     handleError(error, req, res);
@@ -674,11 +688,13 @@ export const createStudent = async (req: Request, res: Response) => {
       priorityTier,
     } = parsed.data;
 
-    const passwordHash = await bcrypt.hash(`${rollNumber}@iiituna`, 10);
+    const plainPassword = (req.body && req.body.password) ? String(req.body.password) : `${rollNumber}@iiituna`;
+    const passwordHash = await bcrypt.hash(plainPassword, 10);
+    const sanitizedName = s(name).replace(/<[^>]*>?/gm, ''); // Basic XSS strip
     const student = await prisma.student.create({
       data: {
         rollNumber,
-        name,
+        name: sanitizedName,
         email,
         year: n(year),
         branch,
@@ -862,7 +878,8 @@ export const createTeacher = async (req: Request, res: Response) => {
       return res.status(400).json({ message: parsed.error.issues[0].message });
 
     const { employeeId, name, email, gender, department, phone } = parsed.data;
-    const passwordHash = await bcrypt.hash(`${employeeId}@iiituna`, 10);
+    const plainPassword = (req.body && req.body.password) ? String(req.body.password) : `${employeeId}@iiituna`;
+    const passwordHash = await bcrypt.hash(plainPassword, 10);
     const teacher = await prisma.teacher.create({
       data: {
         employeeId,
