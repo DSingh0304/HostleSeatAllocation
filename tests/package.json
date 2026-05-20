@@ -1,0 +1,29 @@
+{
+  "name": "residentiq-tests",
+  "version": "1.0.0",
+  "description": "Production-grade integration & E2E test suite for ResidentIQ Hostel Allocation System",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run --reporter=verbose",
+    "test:watch": "vitest --reporter=verbose",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run e2e --reporter=verbose",
+    "test:unit": "vitest run unit --reporter=verbose",
+    "test:report": "vitest run --reporter=json --outputFile=reports/results.json && node helpers/report-generator.js",
+    "test:ci": "vitest run --reporter=verbose --reporter=json --outputFile=reports/results.json",
+    "seed:test": "ts-node helpers/seed-test-data.ts",
+    "reset:test": "ts-node helpers/reset-test-db.ts"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.5.0",
+    "axios": "^1.7.7",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}
