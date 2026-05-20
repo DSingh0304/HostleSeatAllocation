@@ -3,6 +3,8 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+    environment:
+      DISABLE_RATE_LIMITERS: 'true'
     ports:
       - '3000:3000'
     env_file: ./server/.env
