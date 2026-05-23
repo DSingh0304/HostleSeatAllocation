@@ -179,7 +179,7 @@ npm run build
 
 ## CI
 
-CI workflow is available in `.github/workflows/ci.yml` and validates:
+There is no checked-in CI workflow yet. If you add `.github/workflows/ci.yml`, a good baseline would validate:
 - backend dependency install
 - Prisma generation and schema push
 - TypeScript build
