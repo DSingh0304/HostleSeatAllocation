@@ -35,7 +35,6 @@ export default function ReportsTab() {
 
   return (
     <div className="space-y-8">
-      {/* Occupancy */}
       <div className="card p-8 rounded-[2.5rem]">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-black flex items-center gap-3"><BarChart3 className="w-6 h-6 text-primary" /> Occupancy Report</h2>
@@ -67,7 +66,6 @@ export default function ReportsTab() {
         </div>
       </div>
 
-      {/* Audit Logs */}
       <div className="card rounded-[2.5rem] overflow-hidden">
         <div className="p-8 border-b border-foreground/5 flex justify-between items-center">
           <h2 className="text-xl font-black">Audit Log</h2>
