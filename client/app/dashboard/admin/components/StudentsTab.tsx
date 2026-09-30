@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Users, Plus, Search, Trash2, RefreshCw, Upload, Loader2, KeyRound, GraduationCap, UserMinus } from 'lucide-react';
+import { Plus, Search, Trash2, RefreshCw, Upload, Loader2, KeyRound, UserMinus } from 'lucide-react';
 import api from '../../../lib/api';
 import toast from 'react-hot-toast';
 
@@ -110,7 +110,6 @@ export default function StudentsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Tab switcher */}
       <div className="flex p-1 bg-foreground/5 rounded-2xl w-fit">
         {(['students', 'teachers'] as const).map(t => (
           <button key={t} onClick={() => setView(t)}
@@ -120,7 +119,6 @@ export default function StudentsTab() {
 
       {view === 'students' && (
         <>
-          {/* Toolbar */}
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="flex gap-3 flex-1 max-w-2xl">
               <div className="relative flex-1">
@@ -146,7 +144,6 @@ export default function StudentsTab() {
             </div>
           </div>
 
-          {/* Create Student Form */}
           {showStudentForm && (
             <div className="card p-8 rounded-[2rem] border border-primary/20">
               <h3 className="font-black text-xl mb-6">New Student Account</h3>
@@ -188,7 +185,6 @@ export default function StudentsTab() {
             </div>
           )}
 
-          {/* Student Table */}
           <div className="card rounded-[2.5rem] overflow-hidden">
             <div className="p-6 border-b border-foreground/5 flex justify-between items-center">
               <p className="font-bold">{total} students total</p>
