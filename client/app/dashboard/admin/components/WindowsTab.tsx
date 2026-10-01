@@ -93,7 +93,6 @@ export default function WindowsTab() {
     return `${gender} • ${programs} • ${years}${hostel}`;
   };
 
-  // Filter hostels by selected gender for the hostel dropdown
   const filteredHostels = form.gender
     ? hostels.filter(h => h.gender === form.gender || form.gender === 'mixed' || h.gender === 'mixed')
     : hostels;
@@ -101,7 +100,6 @@ export default function WindowsTab() {
   return (
     <div className="space-y-8">
 
-      {/* How it works */}
       <div className="glass p-6 rounded-[2rem] border border-primary/10 bg-primary/5">
         <p className="font-black text-sm text-primary mb-3 flex items-center gap-2"><Info className="w-4 h-4" /> How Allocation Windows Work</p>
         <ol className="text-sm text-foreground/60 space-y-1.5 list-decimal list-inside">
@@ -113,12 +111,10 @@ export default function WindowsTab() {
         </ol>
       </div>
 
-      {/* Create Window */}
       <div className="glass p-8 rounded-[2.5rem]">
         <h2 className="text-2xl font-black mb-6 flex items-center gap-3"><Calendar className="w-6 h-6 text-primary" /> Create Allocation Window</h2>
         <form onSubmit={createWindow} className="space-y-6">
 
-          {/* Row 1: Name + Gender */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-black uppercase tracking-widest text-foreground/40">Window Name *</label>
@@ -140,7 +136,6 @@ export default function WindowsTab() {
             </div>
           </div>
 
-          {/* Row 2: Hostel (optional) */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-black uppercase tracking-widest text-foreground/40">
               Specific Hostel <span className="normal-case text-foreground/30 font-medium">(optional  leave blank to open all eligible hostels)</span>
@@ -153,7 +148,6 @@ export default function WindowsTab() {
             </select>
           </div>
 
-          {/* Row 3: Dates */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-black uppercase tracking-widest text-foreground/40">Opens At *</label>
@@ -165,7 +159,6 @@ export default function WindowsTab() {
             </div>
           </div>
 
-          {/* Row 4: Programs + Years */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black uppercase tracking-widest text-foreground/40">
@@ -202,13 +195,11 @@ export default function WindowsTab() {
         </form>
       </div>
 
-      {/* Locking info */}
       <div className="glass p-6 rounded-2xl border border-orange-500/20 bg-orange-500/5">
         <p className="font-bold text-sm text-orange-500 mb-1 flex items-center gap-2"><Lock className="w-4 h-4" /> About Allocation Locking</p>
         <p className="text-sm text-foreground/60">When you <strong>lock</strong> a window, students can no longer book or cancel  even if the window is still active. Only admin manual overrides will work. Unlock at any time to restore student self-service.</p>
       </div>
 
-      {/* Windows List */}
       <div className="glass rounded-[2.5rem] overflow-hidden">
         <div className="p-8 border-b border-foreground/5"><h2 className="text-xl font-black">Allocation Windows</h2></div>
         <div className="divide-y divide-foreground/5">
