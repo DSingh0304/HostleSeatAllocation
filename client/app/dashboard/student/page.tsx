@@ -12,7 +12,6 @@ import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
-//  Notification Bell 
 function NotificationBell({ notifications, onMarkRead }: { notifications: any[], onMarkRead: () => void }) {
   const [open, setOpen] = useState(false);
   const unread = notifications.filter(n => !n.isRead).length;
@@ -20,7 +19,7 @@ function NotificationBell({ notifications, onMarkRead }: { notifications: any[],
 
   return (
     <div className="relative">
-      <button onClick={() => setOpen(!open)} className="relative p-3 card rounded-xl hover:bg-foreground/10 transition-all">
+      <button onClick={() => setOpen(!open)} className="relative p-3 sketch-border rounded-xl hover:bg-white/50 transition-all">
         <Bell className="w-5 h-5" />
         {unread > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">{unread}</span>}
       </button>
@@ -53,7 +52,6 @@ function NotificationBell({ notifications, onMarkRead }: { notifications: any[],
   );
 }
 
-//  Notice Banner 
 function NoticeBanner({ notices }: { notices: any[] }) {
   const [dismissed, setDismissed] = useState<string[]>([]);
   const visible = notices.filter(n => !dismissed.includes(n.id));
@@ -75,7 +73,6 @@ function NoticeBanner({ notices }: { notices: any[] }) {
   );
 }
 
-//  10-Minute Booking Confirmation Modal 
 function BookingConfirmModal({ room, hostelName, onConfirm, onCancel }: {
   room: any; hostelName: string; onConfirm: () => void; onCancel: () => void;
 }) {
@@ -124,7 +121,6 @@ function BookingConfirmModal({ room, hostelName, onConfirm, onCancel }: {
   );
 }
 
-//  Roommate Invite Modal 
 function InviteModal({ room, windowId, onClose, onBook, onRefresh }: { room: any; windowId: string; onClose: () => void; onBook?: () => void; onRefresh: () => void }) {
   const [rollNumber, setRollNumber] = useState('');
   const [loading, setLoading] = useState(false);
@@ -142,8 +138,8 @@ function InviteModal({ room, windowId, onClose, onBook, onRefresh }: { room: any
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[rgb(var(--background))] border border-foreground/10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
         <div className="flex justify-between items-start mb-6">
-          <div><h2 className="text-2xl font-black">Invite Roommates</h2><p className="text-foreground/50 text-sm mt-1">Room {room.roomNumber} • {room.capacity} seats</p></div>
-          <button onClick={onClose} className="p-2 card rounded-xl text-foreground/40 hover:text-foreground"><X className="w-5 h-5" /></button>
+          <div><h2 className="text-3xl font-black">Invite Roommates</h2><p className="text-[var(--pencil-grey)] text-sm mt-1">Room {room.roomNumber} • {room.capacity} seats</p></div>
+          <button onClick={onClose} className="p-2 sketch-border rounded-xl hover:text-[var(--alert-red)]"><X className="w-5 h-5" /></button>
         </div>
         <p className="text-sm text-foreground/60 mb-4 bg-primary/5 p-4 rounded-2xl">
           Sending an invite will <strong>automatically book</strong> this room for you (if not already). 
@@ -166,7 +162,6 @@ function InviteModal({ room, windowId, onClose, onBook, onRefresh }: { room: any
   );
 }
 
-//  Pending Invites Banner 
 function PendingInvites({ received, sent, onRefresh, responseLocked }: { received: any[]; sent: any[]; onRefresh: () => void; responseLocked: boolean }) {
   const pendingReceived = received.filter((i: any) => i.status === 'pending');
   const pendingSent = sent.filter((i: any) => i.status === 'pending');
@@ -187,8 +182,9 @@ function PendingInvites({ received, sent, onRefresh, responseLocked }: { receive
   return (
     <div className="space-y-4 mb-8">
       {pendingReceived.length > 0 && (
-        <div className="card p-6 rounded-[2.5rem] border border-primary/20">
-          <h3 className="font-black mb-4 flex items-center gap-2 text-primary"><UserPlus className="w-5 h-5" /> Invites Received ({pendingReceived.length})</h3>
+        <div className="sketch-border p-6 relative">
+          <div className="tape-effect" style={{ backgroundColor: 'var(--highlighter)' }}></div>
+          <h3 className="font-black mb-4 flex items-center gap-2 text-[var(--ink-blue)]"><UserPlus className="w-5 h-5" /> Invites Received ({pendingReceived.length})</h3>
           <div className="space-y-3">
             {pendingReceived.map((inv: any) => (
               <div key={inv.id} className="flex items-center justify-between gap-4 p-4 bg-foreground/5 rounded-2xl">
@@ -222,8 +218,8 @@ function PendingInvites({ received, sent, onRefresh, responseLocked }: { receive
       )}
 
       {pendingSent.length > 0 && (
-        <div className="card p-6 rounded-[2.5rem] border border-foreground/10 opacity-80">
-          <h3 className="font-black mb-4 flex items-center gap-2 text-foreground/60"><Send className="w-5 h-5" /> Invites Sent ({pendingSent.length})</h3>
+        <div className="sketch-border-alt p-6 opacity-80">
+          <h3 className="font-black mb-4 flex items-center gap-2 text-[var(--ink-blue)]"><Send className="w-5 h-5" /> Invites Sent ({pendingSent.length})</h3>
           <div className="space-y-3">
             {pendingSent.map((inv: any) => (
               <div key={inv.id} className="flex items-center justify-between gap-4 p-4 bg-foreground/5 rounded-2xl">
@@ -241,7 +237,6 @@ function PendingInvites({ received, sent, onRefresh, responseLocked }: { receive
   );
 }
 
-//  Main Student Dashboard 
 const POLL_INTERVAL_MS = 30_000;
 
 export default function StudentDashboard() {
@@ -401,9 +396,8 @@ export default function StudentDashboard() {
         />
       )}
 
-      {/* Top Nav */}
-      <header className="sticky top-0 z-30 bg-white border-b border-border px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-[var(--paper-note)] border-b-2 border-dashed border-[var(--pencil-grey)] px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <Home className="w-5 h-5 text-white" />
@@ -427,7 +421,7 @@ export default function StudentDashboard() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-6 md:p-10">
+      <main className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-black">Hey, {profile?.name?.split(' ')[0] ?? 'Student'} 👋</h1>
           <p className="text-foreground/40 font-medium mt-1">{profile?.rollNumber} • {profile?.program?.toUpperCase()} Year {profile?.year} • {profile?.branch}</p>
@@ -453,7 +447,6 @@ export default function StudentDashboard() {
           responseLocked={profile?.assignment?.status === 'confirmed'}
         />
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-8">
           {TABS.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
@@ -466,15 +459,15 @@ export default function StudentDashboard() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.18 }}>
 
-            {/*  HOME  */}
             {activeTab === 'home' && (
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Current room card */}
-                <div className="card p-8 rounded-[2.5rem]">
-                  <h2 className="text-xl font-black mb-6 flex items-center gap-2"><Home className="w-5 h-5 text-primary" /> Your Room</h2>
+              <div className="grid md:grid-cols-2 gap-6 relative">
+                <div className="spiral-binding hidden md:block" style={{ left: '-15px' }}></div>
+                <div className="sketch-border p-8 relative bg-white">
+                  <div className="tape-effect" style={{ backgroundColor: 'var(--alert-red)' }}></div>
+                  <h2 className="text-2xl font-black mb-6 flex items-center gap-2"><Home className="w-6 h-6 text-[var(--alert-red)]" /> Your Room</h2>
                   {profile?.assignment?.status === 'confirmed' ? (
                     <div className="space-y-6">
-                      <div className="gradient-bg rounded-3xl p-6 text-white relative overflow-hidden">
+                      <div className="sketch-border-alt p-6 text-white relative overflow-hidden bg-[var(--ink-blue)]">
                         <div className="relative z-10">
                           <p className="text-white/70 text-xs font-black uppercase tracking-widest mb-1">Room</p>
                           <p className="text-5xl font-black">{profile.assignment.room?.roomNumber}</p>
@@ -483,7 +476,6 @@ export default function StudentDashboard() {
                         <Users className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10" />
                       </div>
 
-                      {/* Occupants List */}
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30 mb-4">Current Occupants</p>
                         <div className="space-y-3">
@@ -501,7 +493,6 @@ export default function StudentDashboard() {
                               <CheckCircle2 className="w-4 h-4 text-green-500" />
                             </div>
                           ))}
-                          {/* Vacant slots slots */}
                           {Array.from({ length: profile.assignment.room?.capacity - (profile.assignment.room?.assignments?.length ?? 0) }).map((_, i) => (
                             <div key={i} className="flex items-center justify-between p-4 border border-dashed border-foreground/10 rounded-2xl opacity-50">
                               <p className="text-xs font-bold text-foreground/40 italic">Empty Slot</p>
@@ -511,7 +502,6 @@ export default function StudentDashboard() {
                         </div>
                       </div>
 
-                      {/* Group Controls */}
                       {profile.assignment.room?.assignments?.length < profile.assignment.room?.capacity && (
                         <div className="space-y-4 pt-4 border-t border-foreground/5">
                           <div className="flex items-center justify-between">
@@ -563,9 +553,9 @@ export default function StudentDashboard() {
                   )}
                 </div>
 
-                {/* Window card */}
-                <div className="card p-8 rounded-[2.5rem]">
-                  <h2 className="text-xl font-black mb-6 flex items-center gap-2"><Clock className="w-5 h-5 text-primary" /> Allocation Window</h2>
+                <div className="sketch-border p-8 relative bg-white">
+                  <div className="coffee-ring" style={{ top: '-40px', right: '-40px' }}></div>
+                  <h2 className="text-2xl font-black mb-6 flex items-center gap-2"><Clock className="w-6 h-6 text-[var(--alert-red)]" /> Allocation Window</h2>
                   {activeWindow ? (
                     <div className="space-y-4">
                       <div className={`p-4 rounded-2xl ${activeWindow.lockedAt ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-green-500/10 border border-green-500/20'}`}>
@@ -589,20 +579,20 @@ export default function StudentDashboard() {
               </div>
             )}
 
-            {/*  BOOK  */}
             {activeTab === 'book' && (
               <div className="space-y-6">
                 {!activeWindow ? (
-                  <div className="card p-10 rounded-[2.5rem] text-center">
-                    <Clock className="w-12 h-12 text-foreground/10 mx-auto mb-4" />
-                    <p className="font-bold text-foreground/40">No allocation window is currently open.</p>
+                  <div className="sketch-border p-10 text-center bg-white relative">
+                    <Clock className="w-12 h-12 text-[var(--pencil-grey)] mx-auto mb-4 opacity-50" />
+                    <p className="font-bold text-[var(--ink-blue)] opacity-60 text-xl">No allocation window is currently open.</p>
                   </div>
                 ) : profile?.assignment?.status === 'confirmed' ? (
-                  <div className="card p-12 rounded-[2.5rem] text-center border-2 border-primary/20">
-                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <AlertTriangle className="w-10 h-10 text-primary" />
+                  <div className="sketch-border p-12 text-center border-4 border-[var(--alert-red)] bg-white relative">
+                    <div className="tape-effect" style={{ width: '150px' }}></div>
+                    <div className="w-20 h-20 bg-[var(--alert-red)]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <AlertTriangle className="w-10 h-10 text-[var(--alert-red)]" />
                     </div>
-                    <h2 className="text-2xl font-black mb-2">Switching Rooms?</h2>
+                    <h2 className="text-3xl font-black mb-2 text-[var(--ink-blue)]">Switching Rooms?</h2>
                     <p className="text-foreground/50 max-w-sm mx-auto mb-8">
                       You are already allocated to Room <strong>{profile.assignment.room?.roomNumber}</strong>. 
                       To book a different room, you must first cancel your current allocation.
@@ -613,7 +603,6 @@ export default function StudentDashboard() {
                   </div>
                 ) : (
                   <>
-                    {/* Hostel selector */}
                     {eligibleHostels.length === 0 ? (
                       <div className="card p-10 rounded-[2.5rem] text-center">
                         <p className="text-foreground/40 font-bold">No eligible hostels found for your profile.</p>
@@ -624,8 +613,8 @@ export default function StudentDashboard() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                           {eligibleHostels.map(h => (
                             <button key={h.id} onClick={() => { setSelectedHostel(h); loadRooms(h.id); }}
-                              className={`p-6 card rounded-3xl text-left transition-all border-2 ${selectedHostel?.id === h.id ? 'border-primary bg-primary/5' : 'border-transparent hover:border-primary/20'}`}>
-                              <p className="font-black text-lg mb-1">{h.name}</p>
+                              className={`p-6 ${selectedHostel?.id === h.id ? 'sketch-border bg-[var(--highlighter)] scale-105' : 'sketch-border-alt bg-white'} text-left transition-transform`}>
+                              <p className="font-black text-2xl mb-1">{h.name}</p>
                               <p className="text-sm text-foreground/40 capitalize">{h.gender} hostel • {h._count?.rooms ?? 0} rooms</p>
                             </button>
                           ))}
@@ -633,7 +622,6 @@ export default function StudentDashboard() {
                       </div>
                     )}
 
-                    {/* Room grid */}
                     {selectedHostel && (
                       <div>
                         <p className="text-xs font-black uppercase tracking-widest text-foreground/40 mb-4">Available Rooms in {selectedHostel.name}</p>
@@ -651,9 +639,9 @@ export default function StudentDashboard() {
                                 const available = room.capacity - occupied;
                                 const isFull = available === 0;
                                 return (
-                                  <div key={room.id} className={`card p-5 rounded-3xl transition-all ${isFull ? 'opacity-40' : 'hover:border hover:border-primary/30'}`}>
-                                    <p className="font-black text-2xl mb-1">{room.roomNumber}</p>
-                                    <p className="text-xs text-foreground/40 font-bold mb-4">{available}/{room.capacity} seats available</p>
+                                  <div key={room.id} className={`sketch-border p-5 bg-white transition-transform ${isFull ? 'opacity-40 grayscale' : 'hover:scale-105 hover:bg-[var(--highlighter)] hover:border-[var(--alert-red)]'}`}>
+                                    <p className="font-black text-3xl mb-1">{room.roomNumber}</p>
+                                    <p className="text-sm text-[var(--pencil-grey)] font-bold mb-4">{available}/{room.capacity} seats available</p>
                                     {!isFull ? (
                                       <div className="flex gap-2">
                                         <button onClick={() => initiateBooking(room)} className="flex-1 py-2.5 btn-primary text-white rounded-xl font-bold text-xs">
