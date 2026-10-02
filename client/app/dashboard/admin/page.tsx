@@ -25,7 +25,6 @@ import WindowsTab from "./components/WindowsTab";
 import AllocateTab from "./components/AllocateTab";
 import ReportsTab from "./components/ReportsTab";
 
-//  Tabs config 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "hostels", label: "Hostels", icon: Building },
@@ -35,7 +34,6 @@ const TABS = [
   { id: "reports", label: "Reports", icon: BarChart3 },
 ];
 
-//  Overview Component 
 function OverviewTab() {
   const [stats, setStats] = useState<any>(null);
   const [allocations, setAllocations] = useState<any[]>([]);
@@ -94,9 +92,10 @@ function OverviewTab() {
             key={label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`bg-gradient-to-br ${color} p-6 rounded-3xl text-white shadow-xl`}
+            className={`sketch-border p-6 bg-[${color}] text-[var(--ink-blue)] relative`}
           >
-            <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-2">
+            <div className="tape-effect" style={{ backgroundColor: 'var(--alert-red)', width: '60px' }}></div>
+            <p className="text-[var(--pencil-grey)] text-xs font-black uppercase tracking-widest mb-2">
               {label}
             </p>
             <p className="text-4xl font-black">{value ?? ""}</p>
@@ -113,9 +112,10 @@ function OverviewTab() {
             ))}
       </div>
 
-      <div className="card rounded-[2.5rem] overflow-hidden">
-        <div className="p-8 border-b border-foreground/5">
-          <h2 className="text-xl font-black">Recent Allocations</h2>
+      <div className="sketch-border overflow-hidden bg-white relative">
+        <div className="coffee-ring" style={{ top: '-50px', right: '-50px' }}></div>
+        <div className="p-8 border-b-2 border-dashed border-[var(--pencil-grey)] relative z-10">
+          <h2 className="text-2xl font-black">Recent Allocations</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -191,7 +191,6 @@ function OverviewTab() {
   );
 }
 
-//  Main Page 
 export default function AdminDashboard() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
@@ -242,11 +241,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-border flex flex-col transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[var(--paper-note)] border-r-2 border-dashed border-[var(--pencil-grey)] flex flex-col transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
-        {/* Logo */}
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
@@ -263,7 +260,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -284,7 +280,6 @@ export default function AdminDashboard() {
           })}
         </nav>
 
-        {/* User footer */}
         <div className="p-4 border-t border-border">
           <div className="flex items-center gap-3 px-3 py-3 mb-2">
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
@@ -308,7 +303,6 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
@@ -316,10 +310,9 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Main */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
-        {/* Top bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-border px-6 py-4 flex items-center justify-between">
+      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen relative">
+        <div className="spiral-binding hidden lg:block"></div>
+        <header className="sticky top-0 z-20 bg-[var(--paper-note)] border-b-2 border-dashed border-[var(--pencil-grey)] px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -347,8 +340,7 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-1 p-6 md:p-10">
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
