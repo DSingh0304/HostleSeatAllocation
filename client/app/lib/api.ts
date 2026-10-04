@@ -5,7 +5,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor for JWT
 api.interceptors.request.use((config) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   if (token) {
@@ -14,7 +13,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor for refresh token
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -28,7 +26,7 @@ api.interceptors.response.use(
           localStorage.setItem('token', data.token);
           api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
           return api(originalRequest);
-        } catch (refreshError) {
+        } catch (_error) {
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           window.location.href = '/login';
