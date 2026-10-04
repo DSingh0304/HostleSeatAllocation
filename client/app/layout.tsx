@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Patrick_Hand } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
-const inter = Inter({ subsets: ["latin"] });
+const patrickHand = Patrick_Hand({ 
+  weight: "400",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "ResidentIQ | Smart Hostel Allocation",
@@ -18,17 +21,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={patrickHand.className}>
         <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
             style: {
-              background: "rgb(var(--glass-bg-color))",
-              color: "rgb(var(--foreground))",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(var(--foreground), 0.1)",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+              background: "var(--paper-note)",
+              color: "var(--ink-blue)",
+              border: "2px solid var(--pencil-grey)",
+              borderRadius: "255px 15px 225px 15px / 15px 225px 15px 255px",
+              boxShadow: "4px 4px 0px rgba(0, 0, 0, 0.1)",
+              fontFamily: "var(--font-hand)",
             },
           }}
         />
