@@ -27,7 +27,7 @@ export default function OnboardingPage() {
     if (!user) {
       router.replace('/login');
     }
-  }, [user]);
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,18 +64,21 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--paper-note)] p-6 relative">
+      <div className="coffee-ring top-20 right-20 hidden md:block"></div>
+      <div className="spiral-binding hidden sm:block"></div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md card p-8"
       >
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-primary rounded-lg flex items-center justify-center mb-4">
-            <ShieldCheck className="text-white w-7 h-7" />
+        <div className="flex flex-col items-center mb-8 relative">
+          <div className="tape-effect" style={{ backgroundColor: 'var(--alert-red)', top: '-20px' }}></div>
+          <div className="w-16 h-16 sketch-border flex items-center justify-center mb-4 bg-white rotate-3">
+            <ShieldCheck className="text-[var(--alert-red)] w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2 text-center">Set Up Your Profile</h1>
-          <p className="text-muted-foreground text-sm text-center">
+          <h1 className="text-4xl font-black text-[var(--ink-blue)] mb-2 text-center">Set Up Your Profile</h1>
+          <p className="text-[var(--pencil-grey)] font-bold text-lg text-center">
             This is required before you can access the hostel portal.
           </p>
         </div>
@@ -89,10 +92,10 @@ export default function OnboardingPage() {
                   key={g}
                   type="button"
                   onClick={() => setForm({ ...form, gender: g })}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all border ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 font-bold transition-all text-lg ${
                     form.gender === g
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border text-muted-foreground hover:border-primary/50'
+                      ? 'sketch-border bg-[var(--highlighter)] text-[var(--ink-blue)] scale-105'
+                      : 'text-[var(--pencil-grey)] bg-[rgba(14,42,92,0.05)] sketch-border-alt hover:bg-white'
                   }`}
                 >
                   <User2 className="w-4 h-4" />
@@ -100,7 +103,7 @@ export default function OnboardingPage() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm font-bold text-[var(--pencil-grey)]">
               This is used to determine which hostels you are eligible for.
             </p>
           </div>
