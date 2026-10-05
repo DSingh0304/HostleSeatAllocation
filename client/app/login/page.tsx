@@ -43,32 +43,37 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--paper-note)] p-6 relative">
+      <div className="coffee-ring top-20 right-20 hidden md:block"></div>
+      <div className="spiral-binding hidden sm:block"></div>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md card p-8"
       >
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-primary rounded-lg flex items-center justify-center mb-4">
-            <Building2 className="text-white w-7 h-7" />
+        <div className="flex flex-col items-center mb-8 relative">
+          <div className="tape-effect" style={{ backgroundColor: 'var(--alert-red)', top: '-20px' }}></div>
+          <div className="w-16 h-16 sketch-border flex items-center justify-center mb-4 bg-white rotate-3">
+            <Building2 className="text-[var(--alert-red)] w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
-          <p className="text-muted-foreground text-sm">Enter your credentials to continue</p>
+          <h2 className="text-4xl font-black text-[var(--ink-blue)]">Welcome Back</h2>
+          <p className="text-[var(--pencil-grey)] font-bold text-lg">Enter your credentials to continue</p>
         </div>
 
-        <div className="flex gap-2 p-1 bg-muted rounded-lg mb-6">
+        <div className="flex gap-4 p-2 bg-[rgba(14,42,92,0.05)] rounded-2xl mb-8 border-2 border-dashed border-[var(--pencil-grey)]">
           <button 
+            type="button"
             onClick={() => setIsAdmin(false)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md font-medium transition-all text-sm ${!isAdmin ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 font-bold transition-all text-lg ${!isAdmin ? 'sketch-border bg-[var(--highlighter)] text-[var(--ink-blue)] scale-105' : 'text-[var(--pencil-grey)] hover:bg-white/50 rounded-xl'}`}
           >
-            <User className="w-4 h-4" /> Student
+            <User className="w-5 h-5" /> Student
           </button>
           <button 
+            type="button"
             onClick={() => setIsAdmin(true)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md font-medium transition-all text-sm ${isAdmin ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 font-bold transition-all text-lg ${isAdmin ? 'sketch-border bg-[var(--highlighter)] text-[var(--ink-blue)] scale-105' : 'text-[var(--pencil-grey)] hover:bg-white/50 rounded-xl'}`}
           >
-            <ShieldCheck className="w-4 h-4" /> Warden
+            <ShieldCheck className="w-5 h-5" /> Warden
           </button>
         </div>
 
@@ -113,8 +118,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <a href="#" className="text-sm font-medium text-primary hover:underline">Forgot Password?</a>
+        <div className="mt-8 text-center">
+          <a href="#" className="text-lg font-bold text-[var(--alert-red)] hover:underline decoration-wavy underline-offset-4">Forgot Password?</a>
         </div>
       </motion.div>
     </div>
