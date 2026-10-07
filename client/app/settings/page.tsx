@@ -19,7 +19,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!localStorage.getItem('token')) router.replace('/login');
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +39,7 @@ export default function SettingsPage() {
   const isAdmin = user?.role === 'superadmin' || user?.role === 'warden';
   const dashboardPath = isAdmin ? '/dashboard/admin' : '/dashboard/student';
 
-  const inputClass = (show: boolean) => `w-full px-5 py-4 rounded-2xl bg-foreground/5 border border-transparent focus:border-primary/30 transition-all outline-none font-medium pr-12`;
+  const inputClass = () => `w-full px-5 py-4 rounded-2xl bg-foreground/5 border border-transparent focus:border-primary/30 transition-all outline-none font-medium pr-12`;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
@@ -59,7 +59,7 @@ export default function SettingsPage() {
               <Lock className="text-white w-8 h-8" />
             </div>
             <h1 className="text-3xl font-black">Change Password</h1>
-            <p className="text-foreground/50 text-sm mt-2 text-center">Choose a strong password you haven't used before.</p>
+            <p className="text-foreground/50 text-sm mt-2 text-center">Choose a strong password you haven&apos;t used before.</p>
           </div>
 
           {success ? (
@@ -73,7 +73,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-foreground/40 ml-1">Current Password</label>
                 <div className="relative">
-                  <input type={showOld ? 'text' : 'password'} required value={form.oldPassword} onChange={e => setForm(f => ({ ...f, oldPassword: e.target.value }))} placeholder="Your current password" className={inputClass(showOld)} />
+                  <input type={showOld ? 'text' : 'password'} required value={form.oldPassword} onChange={e => setForm(f => ({ ...f, oldPassword: e.target.value }))} placeholder="Your current password" className={inputClass()} />
                   <button type="button" onClick={() => setShowOld(!showOld)} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors">{showOld ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}</button>
                 </div>
               </div>
@@ -81,14 +81,14 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-foreground/40 ml-1">New Password</label>
                 <div className="relative">
-                  <input type={showNew ? 'text' : 'password'} required minLength={8} value={form.newPassword} onChange={e => setForm(f => ({ ...f, newPassword: e.target.value }))} placeholder="Min. 8 characters" className={inputClass(showNew)} />
+                  <input type={showNew ? 'text' : 'password'} required minLength={8} value={form.newPassword} onChange={e => setForm(f => ({ ...f, newPassword: e.target.value }))} placeholder="Min. 8 characters" className={inputClass()} />
                   <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors">{showNew ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}</button>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-foreground/40 ml-1">Confirm New Password</label>
-                <input type="password" required value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} placeholder="Repeat new password" className={inputClass(false)} />
+                <input type="password" required value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} placeholder="Repeat new password" className={inputClass()} />
                 {form.confirmPassword && form.newPassword !== form.confirmPassword && <p className="text-xs text-red-500 ml-1">Passwords do not match</p>}
               </div>
 
