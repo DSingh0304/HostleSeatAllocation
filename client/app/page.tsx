@@ -92,6 +92,17 @@ export default function LandingPage() {
                   <Coffee className="w-5 h-5" /> See how it works
                 </Link>
               </div>
+
+              <div className="mt-12 sketch-border p-6 bg-[var(--highlighter)] inline-block text-left relative transform -rotate-1 max-w-full overflow-hidden">
+                <div className="tape-effect" style={{ top: '-10px', left: '40%' }}></div>
+                <h3 className="text-2xl font-bold mb-3 flex items-center gap-2 text-[var(--ink-blue)]">
+                  <Star className="w-6 h-6 text-[var(--alert-red)]" /> Live Demo Accounts
+                </h3>
+                <div className="text-xl text-[var(--pencil-grey)] space-y-2">
+                  <p><strong className="text-[var(--alert-red)]">Warden:</strong> admin@iiituna.ac.in <span className="mx-2 text-black/20">|</span> password123</p>
+                  <p><strong className="text-[var(--alert-red)]">Student:</strong> TEST1001 <span className="mx-2 text-black/20">|</span> Test@123</p>
+                </div>
+              </div>
             </div>
             
             <div className="flex-1 relative w-full max-w-md mx-auto mt-12 md:mt-0 animate-fade-up delay-200">
