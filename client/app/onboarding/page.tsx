@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Loader2, Eye, EyeOff, User2 } from 'lucide-react';
+import { ShieldCheck, Loader2, Eye, EyeOff, User2, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
@@ -54,75 +54,84 @@ export default function OnboardingPage() {
       setAuth(data.token, data.refreshToken);
       updateUser({ mustChangePassword: false, onboardingDone: true });
 
-      toast.success('Profile set up successfully! Welcome to ResidentIQ.');
+      toast.success('Profile setup complete.');
       router.push('/dashboard/student');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Setup failed. Please try again.');
+      toast.error(error.response?.data?.message || 'Profile setup failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--paper-note)] p-6 relative">
-      <div className="coffee-ring top-20 right-20 hidden md:block"></div>
-      <div className="spiral-binding hidden sm:block"></div>
+    <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF] text-[#1A1A1A] p-6 relative font-sans">
+      <div className="absolute inset-0 swiss-grid-pattern opacity-40 pointer-events-none"></div>
+
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md card p-8"
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md bg-white border border-[#1A1A1A]/20 p-8 sm:p-10 rounded-lg shadow-xl relative z-10 text-left"
       >
-        <div className="flex flex-col items-center mb-8 relative">
-          <div className="tape-effect" style={{ backgroundColor: 'var(--alert-red)', top: '-20px' }}></div>
-          <div className="w-16 h-16 sketch-border flex items-center justify-center mb-4 bg-white rotate-3">
-            <ShieldCheck className="text-[var(--alert-red)] w-8 h-8" />
+        <div className="flex flex-col mb-8 pb-6 border-b border-[#1A1A1A]/10">
+          <div className="inline-flex items-center gap-2 mb-3">
+            <span className="w-2.5 h-2.5 bg-[#D82C2C]"></span>
+            <span className="text-[11px] font-mono uppercase tracking-widest text-[#71717A] font-bold">
+              PROFILE SETUP
+            </span>
           </div>
-          <h1 className="text-4xl font-black text-[var(--ink-blue)] mb-2 text-center">Set Up Your Profile</h1>
-          <p className="text-[var(--pencil-grey)] font-bold text-lg text-center">
-            This is required before you can access the hostel portal.
+          <h1 className="text-3xl font-bold tracking-tight text-[#1A1A1A]">
+            Complete Your Profile
+          </h1>
+          <p className="text-sm text-[#71717A] mt-1">
+            Please select your gender and set your new password to continue.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Your Gender *</label>
-            <div className="flex gap-3">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-[11px] font-mono font-bold tracking-wider uppercase text-[#71717A]">
+              GENDER *
+            </label>
+            <div className="grid grid-cols-2 gap-3">
               {['male', 'female'].map((g) => (
                 <button
                   key={g}
                   type="button"
                   onClick={() => setForm({ ...form, gender: g })}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 font-bold transition-all text-lg ${
+                  className={`flex items-center justify-center gap-2 py-3 font-semibold text-xs tracking-wider uppercase transition-all rounded border ${
                     form.gender === g
-                      ? 'sketch-border bg-[var(--highlighter)] text-[var(--ink-blue)] scale-105'
-                      : 'text-[var(--pencil-grey)] bg-[rgba(14,42,92,0.05)] sketch-border-alt hover:bg-white'
+                      ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-sm'
+                      : 'bg-[#F2F2F2] text-[#1A1A1A] border-[#1A1A1A]/15 hover:border-[#1A1A1A]'
                   }`}
                 >
                   <User2 className="w-4 h-4" />
-                  {g.charAt(0).toUpperCase() + g.slice(1)}
+                  {g.toUpperCase()}
                 </button>
               ))}
             </div>
-            <p className="text-sm font-bold text-[var(--pencil-grey)]">
-              This is used to determine which hostels you are eligible for.
+            <p className="text-[11px] font-mono text-[#71717A] mt-1">
+              Used to show eligible hostel rooms.
             </p>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">New Password *</label>
+            <label className="text-[11px] font-mono font-bold tracking-wider uppercase text-[#71717A]">
+              NEW PASSWORD *
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
                 minLength={8}
-                className="w-full pr-10"
-                placeholder="Min. 8 characters"
+                className="w-full pr-10 text-sm font-sans"
+                placeholder="Minimum 8 characters"
                 value={form.newPassword}
                 onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#71717A] hover:text-[#1A1A1A] transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -131,35 +140,43 @@ export default function OnboardingPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Confirm Password *</label>
+            <label className="text-[11px] font-mono font-bold tracking-wider uppercase text-[#71717A]">
+              CONFIRM PASSWORD *
+            </label>
             <div className="relative">
               <input
                 type={showConfirm ? 'text' : 'password'}
                 required
                 minLength={8}
-                className="w-full pr-10"
-                placeholder="Repeat your new password"
+                className="w-full pr-10 text-sm font-sans"
+                placeholder="Re-type new password"
                 value={form.confirmPassword}
                 onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#71717A] hover:text-[#1A1A1A] transition-colors"
                 onClick={() => setShowConfirm(!showConfirm)}
               >
                 {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
             {form.confirmPassword && form.newPassword !== form.confirmPassword && (
-              <p className="text-xs text-red-600">Passwords do not match</p>
+              <p className="text-xs font-mono text-[#D82C2C] mt-1">Passwords do not match</p>
             )}
           </div>
 
           <button
             disabled={loading || !form.gender || !form.newPassword || form.newPassword !== form.confirmPassword}
-            className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            className="w-full btn-primary py-3.5 mt-6 flex items-center justify-center gap-2 font-semibold text-sm tracking-wide disabled:opacity-50"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Complete Setup & Continue'}
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                Continue to Dashboard <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </form>
       </motion.div>
