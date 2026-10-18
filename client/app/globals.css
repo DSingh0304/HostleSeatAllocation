@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,209 +6,255 @@
 
 @layer base {
   :root {
-    --paper-note: #F4F1EA;
-    --ink-blue: #0E2A5C;
-    --pencil-grey: #333333;
-    --alert-red: #D12828;
-    --highlighter: #FFFFA5;
-    --ballpoint: #0000FF;
-    --font-hand: 'Patrick Hand', cursive;
+    /* Core Design Tokens */
+    --signal-red-swiss: #D82C2C;
+    --black-swiss: #1A1A1A;
+    --white-swiss: #FFFFFF;
+    --cool-grey-swiss: #A9B2B1;
+    --deep-blue-swiss: #0033A0;
+    --light-grey-swiss: #F2F2F2;
+    --grid-gap-swiss: 20px;
+    --font-swiss: 'Helvetica Neue', Helvetica, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    
-    /* Legacy variables mapping to Sketch Design */
-    --background: 244 241 234;
-    --foreground: 14 42 92;
-    --card: 244 241 234;
-    --card-border: 51 51 51;
-    --muted: 244 241 234;
-    --muted-foreground: 51 51 51;
-    --primary: 209 40 40;
-    --primary-foreground: 244 241 234;
-    --secondary: 255 255 165;
-    --secondary-foreground: 14 42 92;
-    --border: 51 51 51;
-    --input: 244 241 234;
-    --ring: 14 42 92;
+
+    /* Theme color variables */
+    --background: 255 255 255;
+    --foreground: 26 26 26;
+    --card: 255 255 255;
+    --card-border: 229 231 235;
+    --muted: 242 242 242;
+    --muted-foreground: 113 113 122;
+    --primary: 216 44 44;
+    --primary-foreground: 255 255 255;
+    --secondary: 0 51 160;
+    --secondary-foreground: 255 255 255;
+    --border: 229 231 235;
+    --input: 255 255 255;
+    --ring: 216 44 44;
+
+    /* Legacy compatibility aliases */
+    --paper-note: #FFFFFF;
+    --ink-blue: #1A1A1A;
+    --pencil-grey: #71717A;
+    --alert-red: #D82C2C;
+    --highlighter: #F2F2F2;
+    --ballpoint: #0033A0;
+    --font-hand: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-swiss);
+    color: var(--black-swiss);
+    background-color: var(--white-swiss);
   }
 
   body {
-    background-color: var(--paper-note);
-    color: var(--ink-blue);
-    font-family: var(--font-hand);
-    /* Notebook paper background */
-    background-image: linear-gradient(rgba(14, 42, 92, 0.1) 1px, transparent 1px);
-    background-size: 100% 2rem;
-    line-height: 2rem;
-    min-height: 100vh;
+    background-color: var(--white-swiss);
+    color: var(--black-swiss);
+    font-family: var(--font-swiss);
+    line-height: 1.6;
+    min-height: 100dvh;
     overflow-x: hidden;
+    text-align: left;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   * {
-    font-family: var(--font-hand);
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--black-swiss);
+    text-align: left;
+  }
+
+  p {
+    text-align: left;
   }
 }
 
 @layer components {
-  /* Sketch specific classes */
-  .card, .glass, .sketch-border {
-    border: 2px solid var(--pencil-grey) !important;
-    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-    background: #ffffff;
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.1) !important;
-    transition: all 0.2s ease-in-out;
+  /* Grid System */
+  .swiss-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--grid-gap-swiss);
+    text-align: left;
   }
 
-  .sketch-border-alt {
-    border: 2px solid var(--ink-blue) !important;
-    border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px !important;
-    background: #ffffff;
-    box-shadow: 4px 4px 0px rgba(14, 42, 92, 0.1) !important;
-    transition: all 0.2s ease-in-out;
+  .red-accent {
+    color: var(--signal-red-swiss);
   }
 
-  .card-hover:hover, .sketch-border:hover, .sketch-border-alt:hover {
-    transform: scale(1.02) rotate(1deg);
-    box-shadow: 6px 6px 0px rgba(14, 42, 92, 0.2);
+  .bg-signal-red {
+    background-color: var(--signal-red-swiss);
   }
 
+  /* Cards & Panels */
+  .card, .swiss-card, .sketch-border, .sketch-border-alt, .glass {
+    border: 1px solid rgba(26, 26, 26, 0.12) !important;
+    border-radius: 8px !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 2px 12px rgba(26, 26, 26, 0.05) !important;
+    transform: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .card:hover, .swiss-card:hover, .sketch-border:hover, .sketch-border-alt:hover {
+    border-color: rgba(26, 26, 26, 0.3) !important;
+    box-shadow: 0 4px 16px rgba(26, 26, 26, 0.08) !important;
+    transform: translateY(-2px) !important;
+  }
+
+  /* Primary Button */
   .btn-primary, .sketch-button-primary {
-    background: var(--alert-red);
-    color: white;
-    padding: 0.5rem 1.5rem;
-    border: 2px solid var(--alert-red) !important;
-    border-radius: 10px 20px 10px 20px / 20px 10px 20px 10px !important;
-    box-shadow: 2px 2px 0px rgba(209, 40, 40, 0.3) !important;
-    font-size: 1.25rem;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    background-color: var(--signal-red-swiss) !important;
+    color: #FFFFFF !important;
+    padding: 0.625rem 1.5rem !important;
+    border: 1px solid var(--signal-red-swiss) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(216, 44, 44, 0.2) !important;
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+    font-family: var(--font-swiss) !important;
+    letter-spacing: -0.01em !important;
+    transition: all 0.2s ease-out !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transform: none !important;
   }
 
   .btn-primary:hover:not(:disabled), .sketch-button-primary:hover:not(:disabled) {
-    transform: scale(1.05) rotate(-2deg);
-    background: var(--ink-blue);
-    border-color: var(--ink-blue);
-    box-shadow: 4px 4px 0px rgba(14, 42, 92, 0.3);
-  }
-  
-  .btn-primary:disabled, .sketch-button-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background-color: #C02222 !important;
+    border-color: #C02222 !important;
+    box-shadow: 0 4px 12px rgba(216, 44, 44, 0.28) !important;
+    transform: translateY(-1px) !important;
   }
 
+  .btn-primary:active:not(:disabled), .sketch-button-primary:active:not(:disabled) {
+    transform: translateY(1px) !important;
+  }
+
+  .btn-primary:disabled, .sketch-button-primary:disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+  }
+
+  /* Secondary / Ghost Button */
   .btn-secondary, .sketch-button {
-    background: transparent;
-    color: var(--ink-blue);
-    padding: 0.5rem 1.5rem;
-    border: 2px solid var(--ink-blue) !important;
-    border-radius: 10px 20px 10px 20px / 20px 10px 20px 10px !important;
-    box-shadow: 2px 2px 0px rgba(14, 42, 92, 0.2) !important;
-    font-size: 1.25rem;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    background-color: transparent !important;
+    color: var(--black-swiss) !important;
+    padding: 0.625rem 1.5rem !important;
+    border: 1px solid var(--black-swiss) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+    font-family: var(--font-swiss) !important;
+    letter-spacing: -0.01em !important;
+    transition: all 0.2s ease-out !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transform: none !important;
   }
 
   .btn-secondary:hover:not(:disabled), .sketch-button:hover:not(:disabled) {
-    transform: scale(1.05) rotate(-2deg);
-    background: var(--highlighter);
-    box-shadow: 4px 4px 0px rgba(14, 42, 92, 0.2);
+    background-color: var(--light-grey-swiss) !important;
+    border-color: var(--black-swiss) !important;
+    color: var(--black-swiss) !important;
+    transform: translateY(-1px) !important;
   }
 
+  .btn-secondary:active:not(:disabled), .sketch-button:active:not(:disabled) {
+    transform: translateY(1px) !important;
+  }
+
+  /* Inputs & Form Controls */
   input:not([type="checkbox"]):not([type="radio"]), 
   textarea, 
   select {
-    background: white;
-    border: 2px solid var(--pencil-grey) !important;
-    border-radius: 10px 5px 10px 5px / 5px 10px 5px 10px !important;
-    padding: 0.5rem 1rem;
-    color: var(--ink-blue);
-    transition: all 0.2s ease;
-    outline: none;
-    font-family: var(--font-hand);
-    font-size: 1.25rem;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.05) !important;
+    background: #FFFFFF !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 8px !important;
+    padding: 0.625rem 1rem !important;
+    color: var(--black-swiss) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    outline: none !important;
+    font-family: var(--font-swiss) !important;
+    font-size: 0.9375rem !important;
+    box-shadow: none !important;
+    transform: none !important;
   }
 
   input:focus, textarea:focus, select:focus {
-    border-color: var(--ink-blue);
-    box-shadow: 4px 4px 0px rgba(14, 42, 92, 0.2);
-    transform: rotate(1deg);
+    border-color: var(--signal-red-swiss) !important;
+    box-shadow: 0 0 0 3px rgba(216, 44, 44, 0.15) !important;
+    transform: none !important;
   }
 
-  /* Tape effect */
-  .tape-effect {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-2deg);
-    width: 100px;
-    height: 30px;
-    background-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border: 1px solid rgba(0,0,0,0.05);
-    z-index: 10;
-    backdrop-filter: blur(2px);
+  /* Badges */
+  .swiss-badge {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
   }
 
-  /* Text Highlighter */
+  /* Highlight Text */
   .highlight-text {
-    background: linear-gradient(104deg, transparent 0%, var(--highlighter) 2%, var(--highlighter) 98%, transparent 100%);
-    padding: 0.1em 0.3em;
+    background-color: var(--light-grey-swiss);
+    color: var(--black-swiss);
+    border-left: 3px solid var(--signal-red-swiss);
+    padding: 0.25rem 0.75rem;
     display: inline-block;
-    transform: rotate(-1deg);
-    font-weight: bold;
+    font-weight: 700;
+    transform: none !important;
   }
 
-  .coffee-ring {
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    border: 8px solid rgba(139, 69, 19, 0.15);
-    border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%;
-    z-index: 0;
-    pointer-events: none;
-    mix-blend-mode: multiply;
+  /* Reset legacy decorations */
+  .tape-effect, .coffee-ring, .spiral-binding, .doodle-arrow {
+    display: none !important;
   }
-  
-  .spiral-binding {
-    position: absolute;
-    left: 20px;
-    top: 0;
-    bottom: 0;
-    width: 30px;
-    z-index: 1;
+
+  /* Background Grid Pattern */
+  .swiss-grid-pattern {
     background-image: 
-      radial-gradient(circle at 15px 15px, var(--pencil-grey) 4px, transparent 5px),
-      radial-gradient(circle at 15px 15px, white 3px, transparent 4px);
-    background-size: 30px 4rem;
-    background-position: 0 1rem;
-    border-right: 2px solid rgba(0,0,0,0.05);
+      linear-gradient(to right, rgba(26, 26, 26, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26, 26, 26, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 
-  .gradient-bg {
-    background: var(--ink-blue) !important;
-    border: 2px solid var(--pencil-grey) !important;
-    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  .swiss-subgrid-line {
+    border-top: 1px solid rgba(26, 26, 26, 0.12);
   }
 }
 
 @layer utilities {
   .animate-fade-up {
-    animation: fadeUp 0.6s ease-out forwards;
+    animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     opacity: 0;
   }
   .delay-100 { animation-delay: 100ms; }
   .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
