@@ -1,37 +1,36 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard,
-  Building,
+  Building2,
   Users,
+  CheckCircle2,
   Calendar,
-  BarChart3,
-  UserCheck,
+  FileText,
   LogOut,
-  Shield,
   Menu,
   X,
+  Shield,
+  Layers,
 } from "lucide-react";
 import api from "../../lib/api";
 import { useAuthStore } from "../../store/authStore";
-
 import HostelsTab from "./components/HostelsTab";
 import StudentsTab from "./components/StudentsTab";
-import WindowsTab from "./components/WindowsTab";
 import AllocateTab from "./components/AllocateTab";
+import WindowsTab from "./components/WindowsTab";
 import ReportsTab from "./components/ReportsTab";
 
 const TABS = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "hostels", label: "Hostels", icon: Building },
+  { id: "overview", label: "Overview", icon: Layers },
+  { id: "hostels", label: "Hostels", icon: Building2 },
   { id: "students", label: "Students", icon: Users },
-  { id: "allocate", label: "Allocate", icon: UserCheck },
-  { id: "windows", label: "Windows", icon: Calendar },
-  { id: "reports", label: "Reports", icon: BarChart3 },
+  { id: "allocate", label: "Manual Allocation", icon: CheckCircle2 },
+  { id: "windows", label: "Allocation Windows", icon: Calendar },
+  { id: "reports", label: "Reports", icon: FileText },
 ];
 
 function OverviewTab() {
@@ -39,14 +38,13 @@ function OverviewTab() {
   const [allocations, setAllocations] = useState<any[]>([]);
 
   useEffect(() => {
-    api
-      .get("/admin/dashboard/stats")
-      .then((r) => setStats(r.data))
-      .catch(() => {});
-    api
-      .get("/admin/allocations", { params: { limit: 10 } })
-      .then((r) => setAllocations(r.data.allocations || r.data))
-      .catch(() => {});
+    Promise.all([
+      api.get("/admin/stats"),
+      api.get("/admin/allocations?limit=10"),
+    ]).then(([statsRes, allocRes]) => {
+      setStats(statsRes.data);
+      setAllocations(allocRes.data.allocations || []);
+    });
   }, []);
 
   const cards = stats
@@ -54,51 +52,61 @@ function OverviewTab() {
         {
           label: "Total Students",
           value: stats.totalStudents,
-          color: "from-violet-500 to-purple-600",
+          sub: "ENROLLED",
+        },
+        {
+          label: "Confirmed Allocations",
+          value: stats.confirmedAllocations,
+          sub: "ALLOCATED",
         },
         {
           label: "Total Capacity",
           value: stats.totalCapacity,
-          color: "from-blue-500 to-cyan-600",
+          sub: "CAPACITY",
         },
         {
-          label: "Seats Filled",
-          value: stats.occupiedSeats,
-          color: "from-green-500 to-emerald-600",
+          label: "Occupancy Rate",
+          value: `${stats.occupancyRate ?? 0}%`,
+          sub: "OCCUPANCY",
         },
         {
-          label: "Total Hostels",
+          label: "Hostel Blocks",
           value: stats.totalHostels,
-          color: "from-orange-500 to-red-600",
+          sub: "BLOCKS",
         },
         {
-          label: "Teachers",
-          value: stats.totalTeachers,
-          color: "from-pink-500 to-rose-600",
-        },
-        {
-          label: "Available",
+          label: "Available Beds",
           value: (stats.totalCapacity || 0) - (stats.occupiedSeats || 0),
-          color: "from-teal-500 to-green-600",
+          sub: "AVAILABLE",
         },
       ]
     : [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-left font-sans">
+      {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-        {cards.map(({ label, value, color }) => (
+        {cards.map(({ label, value, sub }) => (
           <motion.div
             key={label}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`sketch-border p-6 bg-[${color}] text-[var(--ink-blue)] relative`}
+            className="bg-white border border-[#1A1A1A]/15 p-6 rounded-lg shadow-sm hover:border-[#1A1A1A] transition-all text-left flex flex-col justify-between"
           >
-            <div className="tape-effect" style={{ backgroundColor: 'var(--alert-red)', width: '60px' }}></div>
-            <p className="text-[var(--pencil-grey)] text-xs font-black uppercase tracking-widest mb-2">
+            <div>
+              <div className="flex justify-between items-baseline mb-2">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] font-bold">
+                  {sub}
+                </span>
+                <span className="w-1.5 h-1.5 bg-[#D82C2C] rounded-full"></span>
+              </div>
+              <p className="text-3xl sm:text-4xl font-bold font-mono tracking-tight text-[#1A1A1A]">
+                {value ?? ""}
+              </p>
+            </div>
+            <p className="text-xs font-semibold text-[#1A1A1A]/70 mt-4 border-t border-[#1A1A1A]/10 pt-2">
               {label}
             </p>
-            <p className="text-4xl font-black">{value ?? ""}</p>
           </motion.div>
         ))}
         {!stats &&
@@ -107,68 +115,81 @@ function OverviewTab() {
             .map((_, i) => (
               <div
                 key={i}
-                className="h-28 rounded-3xl bg-foreground/5 animate-pulse"
+                className="h-28 rounded-lg bg-[#F2F2F2] border border-[#1A1A1A]/10 animate-pulse"
               />
             ))}
       </div>
 
-      <div className="sketch-border overflow-hidden bg-white relative">
-        <div className="coffee-ring" style={{ top: '-50px', right: '-50px' }}></div>
-        <div className="p-8 border-b-2 border-dashed border-[var(--pencil-grey)] relative z-10">
-          <h2 className="text-2xl font-black">Recent Allocations</h2>
+      {/* Recent Allocations Table */}
+      <div className="bg-white border border-[#1A1A1A]/15 rounded-lg shadow-sm overflow-hidden text-left">
+        <div className="p-6 border-b border-[#1A1A1A]/10 flex justify-between items-center bg-[#FFFFFF]">
+          <div>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] font-bold">
+              ACTIVITY
+            </span>
+            <h2 className="text-xl font-bold tracking-tight text-[#1A1A1A]">
+              Recent Allocations
+            </h2>
+          </div>
+          <span className="text-xs font-mono text-[#D82C2C] font-bold">
+            ● LIVE
+          </span>
         </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-xs font-sans">
             <thead>
-              <tr className="text-foreground/30 font-black text-xs uppercase tracking-widest">
+              <tr className="bg-[#F2F2F2] border-b border-[#1A1A1A]/10 font-mono text-[11px] uppercase tracking-wider text-[#71717A]">
                 {[
                   "Name",
-                  "ID",
+                  "Roll / ID",
                   "Program",
                   "Hostel",
                   "Room",
                   "Type",
-                  "Date",
+                  "Date & Time",
                 ].map((h) => (
-                  <th key={h} className="px-6 py-4">
+                  <th key={h} className="px-6 py-3.5 font-bold">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-foreground/5">
+            <tbody className="divide-y divide-[#1A1A1A]/10">
               {allocations.map((a: any) => (
                 <tr
                   key={a.id}
-                  className="hover:bg-foreground/5 transition-colors"
+                  className="hover:bg-[#F2F2F2]/60 transition-colors"
                 >
-                  <td className="px-6 py-4 font-bold">
+                  <td className="px-6 py-4 font-bold text-[#1A1A1A]">
                     {a.student?.name || a.teacher?.name || ""}
                   </td>
-                  <td className="px-6 py-4 text-foreground/60">
+                  <td className="px-6 py-4 font-mono text-[#71717A]">
                     {a.student?.rollNumber || a.teacher?.employeeId || ""}
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[10px] font-black uppercase bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  <td className="px-6 py-4 font-mono">
+                    <span className="px-2 py-0.5 bg-[#F2F2F2] border border-[#1A1A1A]/15 text-[#1A1A1A] text-[10px] rounded uppercase font-bold">
                       {a.student?.program || "faculty"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-foreground/60">
+                  <td className="px-6 py-4 text-[#71717A]">
                     {a.room?.hostel?.name}
                   </td>
-                  <td className="px-6 py-4 font-bold">{a.room?.roomNumber}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 font-mono font-bold text-[#1A1A1A]">
+                    {a.room?.roomNumber}
+                  </td>
+                  <td className="px-6 py-4 font-mono">
                     {a.adminOverride ? (
-                      <span className="text-orange-500 text-xs font-bold">
-                        Manual
+                      <span className="text-[#D82C2C] font-bold">
+                        MANUAL
                       </span>
                     ) : (
-                      <span className="text-green-500 text-xs font-bold">
-                        Self
+                      <span className="text-[#1A1A1A] font-bold">
+                        ONLINE
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-foreground/40 text-xs">
+                  <td className="px-6 py-4 font-mono text-[#71717A]">
                     {new Date(a.bookedAt).toLocaleString()}
                   </td>
                 </tr>
@@ -177,9 +198,9 @@ function OverviewTab() {
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-6 py-12 text-center text-foreground/40"
+                    className="px-6 py-12 text-center font-mono text-xs text-[#71717A]"
                   >
-                    No allocations yet.
+                    No allocations recorded in the current active window.
                   </td>
                 </tr>
               )}
@@ -240,21 +261,22 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-[#FFFFFF] text-[#1A1A1A] font-sans text-left">
+      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[var(--paper-note)] border-r-2 border-dashed border-[var(--pencil-grey)] flex flex-col transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-[#1A1A1A]/15 flex flex-col transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-[#1A1A1A]/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 bg-[#1A1A1A] rounded flex items-center justify-center text-white font-mono font-bold text-sm">
+              RQ
             </div>
             <div>
-              <p className="font-bold text-lg leading-none text-foreground">
+              <p className="font-bold text-base leading-none text-[#1A1A1A]">
                 ResidentIQ
               </p>
-              <p className="text-xs text-muted-foreground font-medium mt-0.5">
-                Admin Panel
+              <p className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] mt-0.5">
+                Admin Console
               </p>
             </div>
           </div>
@@ -271,83 +293,90 @@ export default function AdminDashboard() {
                   setActiveTab(tab.id);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all ${isActive ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                  isActive
+                    ? "bg-[#1A1A1A] text-white shadow-sm"
+                    : "text-[#71717A] hover:bg-[#F2F2F2] hover:text-[#1A1A1A]"
+                }`}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className="w-4 h-4 flex-shrink-0" />
                 {tab.label}
               </button>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-border">
-          <div className="flex items-center gap-3 px-3 py-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
+        <div className="p-4 border-t border-[#1A1A1A]/10">
+          <div className="flex items-center gap-3 px-3 py-2 mb-2 bg-[#F2F2F2] rounded border border-[#1A1A1A]/10">
+            <div className="w-7 h-7 rounded bg-[#1A1A1A] flex items-center justify-center text-white font-mono font-bold text-xs">
               {user?.name?.[0] || "A"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate text-foreground">
-                {user?.name || "Admin"}
+              <p className="font-bold text-xs truncate text-[#1A1A1A]">
+                {user?.name || "Warden Admin"}
               </p>
-              <p className="text-xs text-muted-foreground font-medium uppercase">
+              <p className="text-[10px] font-mono text-[#D82C2C] uppercase font-bold">
                 {user?.role}
               </p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 font-medium text-sm transition-all"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded text-[#D82C2C] hover:bg-[#D82C2C]/10 font-mono text-xs font-bold uppercase tracking-wider transition-all"
           >
-            <LogOut className="w-4 h-4" /> Sign Out
+            <LogOut className="w-3.5 h-3.5" /> Log Out
           </button>
         </div>
       </aside>
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-[#1A1A1A]/50 z-30 lg:hidden backdrop-blur-xs"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
+      {/* Main Content Area */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen relative">
-        <div className="spiral-binding hidden lg:block"></div>
-        <header className="sticky top-0 z-20 bg-[var(--paper-note)] border-b-2 border-dashed border-[var(--pencil-grey)] px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-20 bg-white border-b border-[#1A1A1A]/15 px-6 py-4 flex items-center justify-between backdrop-blur-md">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 card rounded-lg"
+              className="lg:hidden p-2 border border-[#1A1A1A]/15 rounded"
             >
               {sidebarOpen ? (
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               ) : (
-                <Menu className="w-5 h-5" />
+                <Menu className="w-4 h-4" />
               )}
             </button>
-            <h1 className="text-xl font-bold capitalize text-foreground">
-              {TABS.find((t) => t.id === activeTab)?.label}
-            </h1>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-[#D82C2C]"></span>
+              <h1 className="text-lg font-bold uppercase tracking-tight text-[#1A1A1A] font-mono">
+                {TABS.find((t) => t.id === activeTab)?.label}
+              </h1>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground hidden sm:block">
+            <span className="text-xs font-mono text-[#71717A] hidden sm:block">
               {new Date().toLocaleDateString("en-IN", {
-                weekday: "long",
+                weekday: "short",
                 year: "numeric",
-                month: "long",
+                month: "short",
                 day: "numeric",
               })}
             </span>
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-6 md:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.15 }}
             >
               {renderTab()}
             </motion.div>

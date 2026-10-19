@@ -249,12 +249,15 @@ export default function HostelsTab() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-left font-sans">
       {/*  Create Hostel  */}
-      <div className="glass p-8 rounded-[2.5rem]">
-        <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
-          <Plus className="w-6 h-6 text-primary" /> Add New Hostel
-        </h2>
+      <div className="bg-white border border-[#1A1A1A]/15 p-6 sm:p-8 rounded-lg shadow-sm">
+        <div className="mb-6 pb-4 border-b border-[#1A1A1A]/10">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] font-bold">HOSTEL SETUP</span>
+          <h2 className="text-xl font-bold tracking-tight text-[#1A1A1A] flex items-center gap-2 mt-1">
+            <Plus className="w-5 h-5 text-[#D82C2C]" /> Add New Hostel Block
+          </h2>
+        </div>
         <form
           onSubmit={createHostel}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -265,7 +268,7 @@ export default function HostelsTab() {
             ["Address", "address", "text", "Campus block / location"],
           ].map(([label, key, type, ph]) => (
             <div key={key} className="flex flex-col gap-1.5">
-              <label className="text-xs font-black uppercase tracking-widest text-foreground/40">
+              <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">
                 {label}
               </label>
               <input
@@ -275,50 +278,50 @@ export default function HostelsTab() {
                   setHostelForm((f) => ({ ...f, [key]: e.target.value }))
                 }
                 placeholder={ph}
-                className="px-4 py-3 rounded-xl bg-foreground/5 border border-transparent focus:border-primary/30 outline-none font-medium"
+                className="px-3.5 py-2 rounded border border-[#1A1A1A]/20 focus:border-[#D82C2C] outline-none font-sans text-xs bg-white"
               />
             </div>
           ))}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-black uppercase tracking-widest text-foreground/40">
-              Gender
+            <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">
+              Hostel Gender
             </label>
             <select
               value={hostelForm.gender}
               onChange={(e) =>
                 setHostelForm((f) => ({ ...f, gender: e.target.value }))
               }
-              className="px-4 py-3 rounded-xl bg-foreground/5 border border-transparent focus:border-primary/30 outline-none font-medium"
+              className="px-3.5 py-2 rounded border border-[#1A1A1A]/20 focus:border-[#D82C2C] outline-none font-sans text-xs bg-white"
             >
               <option value="male">Male Only</option>
               <option value="female">Female Only</option>
               <option value="mixed">Mixed (set per-room gender)</option>
             </select>
           </div>
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 mt-2">
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full btn-primary py-2.5 font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
               )}{" "}
-              Create Hostel
+              Add Hostel Block
             </button>
           </div>
         </form>
       </div>
 
       {/*  Hostel List  */}
-      <div className="glass rounded-[2.5rem] overflow-hidden">
-        <div className="p-8 border-b border-foreground/5">
-          <h2 className="text-xl font-black">All Hostels</h2>
-          <p className="text-xs text-foreground/40 mt-1">
-            Click <strong>Configure</strong> to set up rooms and eligibility
-            restrictions for a hostel.
+      <div className="bg-white border border-[#1A1A1A]/15 rounded-lg shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-[#1A1A1A]/10 bg-white">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] font-bold">HOSTELS</span>
+          <h2 className="text-lg font-bold tracking-tight text-[#1A1A1A]">Hostel Directory</h2>
+          <p className="text-xs font-mono text-[#71717A] mt-1">
+            Click <strong>Configure</strong> to set up rooms and eligibility rules.
           </p>
         </div>
         <div className="divide-y divide-foreground/5">

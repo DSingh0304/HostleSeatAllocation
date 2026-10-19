@@ -94,7 +94,7 @@ export default function StudentsTab() {
     } catch (err: any) { toast.error(err.response?.data?.message || 'Import failed'); } finally { setLoading(false); e.target.value = ''; }
   };
 
-  const inputClass = 'px-4 py-3 rounded-xl bg-foreground/5 border border-transparent focus:border-primary/30 outline-none font-medium';
+  const inputClass = 'px-3.5 py-2 rounded border border-[#1A1A1A]/20 focus:border-[#D82C2C] outline-none font-sans text-xs bg-white';
 
   useEffect(() => {
     if (view === 'students') loadStudents();
@@ -145,54 +145,57 @@ export default function StudentsTab() {
           </div>
 
           {showStudentForm && (
-            <div className="card p-8 rounded-[2rem] border border-primary/20">
-              <h3 className="font-black text-xl mb-6">New Student Account</h3>
+            <div className="bg-white border border-[#1A1A1A]/15 p-6 rounded-lg shadow-sm">
+              <div className="mb-4 pb-2 border-b border-[#1A1A1A]/10">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] font-bold">ADD STUDENT</span>
+                <h3 className="font-bold text-lg text-[#1A1A1A] mt-0.5">New Student Account</h3>
+              </div>
               <form onSubmit={createStudent} className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[['Roll Number *', 'rollNumber', 'text', '20101'], ['Full Name *', 'name', 'text', 'John Doe'], ['Email *', 'email', 'email', 'john@example.com'], ['Phone', 'phone', 'tel', '+91 98765 43210']].map(([label, key, type, ph]) => (
                   <div key={key} className="flex flex-col gap-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-foreground/40">{label}</label>
+                    <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">{label}</label>
                     <input type={type} value={(studentForm as any)[key]} onChange={e => setStudentForm(f => ({ ...f, [key]: e.target.value }))} placeholder={ph} className={inputClass} required={label.includes('*')} />
                   </div>
                 ))}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-foreground/40">Year *</label>
+                  <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Year *</label>
                   <select value={studentForm.year} onChange={e => setStudentForm(f => ({ ...f, year: e.target.value }))} className={inputClass} required>
                     <option value="">Select year</option>{[1,2,3,4].map(y => <option key={y} value={y}>Year {y}</option>)}
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-foreground/40">Program *</label>
+                  <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Program *</label>
                   <select value={studentForm.program} onChange={e => setStudentForm(f => ({ ...f, program: e.target.value }))} className={inputClass}>
                     <option value="btech">BTech</option><option value="mtech">MTech</option><option value="phd">PhD</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-foreground/40">Branch *</label>
+                  <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Branch *</label>
                   <input value={studentForm.branch} onChange={e => setStudentForm(f => ({ ...f, branch: e.target.value }))} placeholder="CSE / ECE / ME…" className={inputClass} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-foreground/40">Priority Tier</label>
+                  <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Priority Tier</label>
                   <select value={studentForm.priorityTier} onChange={e => setStudentForm(f => ({ ...f, priorityTier: e.target.value }))} className={inputClass}>
                     <option value="0">Normal (0)</option><option value="1">Medical (1)</option><option value="2">PwD (2)</option>
                   </select>
                 </div>
                 <div className="col-span-full">
-                  <button type="submit" disabled={loading} className="w-full py-4 btn-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 disabled:opacity-50">
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />} Create Student (default password: rollNumber@iiituna)
+                  <button type="submit" disabled={loading} className="w-full btn-primary py-3 font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Create Student Account
                   </button>
                 </div>
               </form>
             </div>
           )}
 
-          <div className="card rounded-[2.5rem] overflow-hidden">
-            <div className="p-6 border-b border-foreground/5 flex justify-between items-center">
-              <p className="font-bold">{total} students total</p>
-              <button onClick={() => loadStudents(page)} className="p-2 card rounded-xl hover:rotate-180 transition-transform duration-500"><RefreshCw className="w-4 h-4 text-primary" /></button>
+          <div className="bg-white border border-[#1A1A1A]/15 rounded-lg shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-[#1A1A1A]/10 flex justify-between items-center bg-white">
+              <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#1A1A1A]">{total} Students Total</p>
+              <button onClick={() => loadStudents(page)} className="p-1.5 border border-[#1A1A1A]/15 rounded hover:border-[#1A1A1A] transition-colors"><RefreshCw className="w-3.5 h-3.5 text-[#1A1A1A]" /></button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead><tr className="text-foreground/30 font-black text-xs uppercase tracking-widest">
+              <table className="w-full text-left text-xs font-sans">
+                <thead><tr className="bg-[#F2F2F2] border-b border-[#1A1A1A]/10 font-mono text-[11px] uppercase tracking-wider text-[#71717A]">
                   {['Student', 'Roll No', 'Year', 'Program', 'Branch', 'Gender', 'Allocation', 'Actions'].map(h => <th key={h} className="px-6 py-4">{h}</th>)}
                 </tr></thead>
                 <tbody className="divide-y divide-foreground/5">
@@ -237,36 +240,39 @@ export default function StudentsTab() {
             </button>
           </div>
           {showTeacherForm && (
-            <div className="card p-8 rounded-[2rem] border border-primary/20">
-              <h3 className="font-black text-xl mb-6">New Teacher Account</h3>
+            <div className="bg-white border border-[#1A1A1A]/15 p-6 rounded-lg shadow-sm">
+              <div className="mb-4 pb-2 border-b border-[#1A1A1A]/10">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] font-bold">ADD FACULTY</span>
+                <h3 className="font-bold text-lg text-[#1A1A1A] mt-0.5">New Faculty Account</h3>
+              </div>
               <form onSubmit={createTeacher} className="grid grid-cols-2 gap-4">
                 {[['Employee ID *', 'employeeId', 'text', 'EMP001'], ['Full Name *', 'name', 'text', 'Dr. Jane Smith'], ['Email *', 'email', 'email', 'jane@iiituna.ac.in'], ['Department *', 'department', 'text', 'CSE'], ['Phone', 'phone', 'tel', '+91 98765 43210']].map(([label, key, type, ph]) => (
                   <div key={key} className="flex flex-col gap-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-foreground/40">{label}</label>
+                    <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">{label}</label>
                     <input type={type} value={(teacherForm as any)[key]} onChange={e => setTeacherForm(f => ({ ...f, [key]: e.target.value }))} placeholder={ph} className={inputClass} required={label.includes('*')} />
                   </div>
                 ))}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-foreground/40">Gender *</label>
+                  <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Gender *</label>
                   <select value={teacherForm.gender} onChange={e => setTeacherForm(f => ({ ...f, gender: e.target.value }))} className={inputClass}>
                     <option value="male">Male</option><option value="female">Female</option>
                   </select>
                 </div>
                 <div className="col-span-full">
-                  <button type="submit" disabled={loading} className="w-full py-4 btn-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 disabled:opacity-50">
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />} Create Teacher (default password: employeeId@iiituna)
+                  <button type="submit" disabled={loading} className="w-full btn-primary py-3 font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Create Faculty Account
                   </button>
                 </div>
               </form>
             </div>
           )}
-          <div className="card rounded-[2.5rem] overflow-hidden">
+          <div className="bg-white border border-[#1A1A1A]/15 rounded-lg shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead><tr className="text-foreground/30 font-black text-xs uppercase tracking-widest">
+              <table className="w-full text-left text-xs font-sans">
+                <thead><tr className="bg-[#F2F2F2] border-b border-[#1A1A1A]/10 font-mono text-[11px] uppercase tracking-wider text-[#71717A]">
                   {['Teacher', 'Employee ID', 'Department', 'Gender', 'Allocation', 'Actions'].map(h => <th key={h} className="px-6 py-4">{h}</th>)}
                 </tr></thead>
-                <tbody className="divide-y divide-foreground/5">
+                <tbody className="divide-y divide-[#1A1A1A]/10">
                   {teachers.map(t => (
                     <tr key={t.id} className="hover:bg-foreground/5 transition-colors">
                       <td className="px-6 py-4">

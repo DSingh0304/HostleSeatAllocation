@@ -130,56 +130,62 @@ export default function AllocateTab() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="card p-8 rounded-[2.5rem]">
-        <h2 className="text-2xl font-black mb-2 flex items-center gap-3">
-          <UserCheck className="w-6 h-6 text-primary" /> Manual Seat Allocation
-        </h2>
-        <p className="text-foreground/50 text-sm mb-8">
-          Assign a room directly to any student or teacher bypasses all
-          restrictions.
-        </p>
+    <div className="space-y-6 max-w-4xl text-left font-sans">
+      <div className="bg-white border border-[#1A1A1A]/15 p-6 sm:p-8 rounded-lg shadow-sm">
+        <div className="mb-6 pb-4 border-b border-[#1A1A1A]/10">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717A] font-bold">MANUAL ALLOCATION</span>
+          <h2 className="text-xl font-bold tracking-tight text-[#1A1A1A] flex items-center gap-2 mt-1">
+            <UserCheck className="w-5 h-5 text-[#D82C2C]" /> Manual Room Allocation
+          </h2>
+          <p className="text-xs text-[#71717A] mt-1">
+            Directly assign a room to a student or faculty member.
+          </p>
+        </div>
 
         {step === "search" && (
-          <div className="space-y-6">
-            <div className="flex p-1 bg-foreground/5 rounded-xl w-fit">
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 p-1 bg-[#F2F2F2] border border-[#1A1A1A]/15 rounded w-fit">
               {(["student", "teacher"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setPersonType(t)}
-                  className={`px-5 py-2 rounded-lg font-bold capitalize transition-all ${personType === t ? "bg-primary text-white" : "text-foreground/40"}`}
+                  className={`px-4 py-1.5 rounded font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                    personType === t 
+                      ? "bg-[#1A1A1A] text-white shadow-sm" 
+                      : "text-[#71717A] hover:text-[#1A1A1A]"
+                  }`}
                 >
                   {t}
                 </button>
               ))}
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && searchPeople()}
                 placeholder={
                   personType === "student"
-                    ? "Search by name, roll number, or email…"
-                    : "Search by name or employee ID…"
+                    ? "Search student by name, roll number, or email…"
+                    : "Search faculty by name or employee ID…"
                 }
-                className="flex-1 px-5 py-4 rounded-2xl bg-foreground/5 border border-transparent focus:border-primary/30 outline-none font-medium"
+                className="flex-1 text-xs font-mono"
               />
               <button
                 onClick={searchPeople}
                 disabled={loading}
-                className="px-6 py-4 btn-primary text-white rounded-2xl font-bold flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 btn-primary text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50"
               >
                 {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <Search className="w-5 h-5" />
+                  <Search className="w-3.5 h-3.5" />
                 )}{" "}
                 Search
               </button>
             </div>
             {results.length > 0 && (
-              <div className="divide-y divide-foreground/5 card rounded-2xl overflow-hidden">
+              <div className="divide-y divide-[#1A1A1A]/10 border border-[#1A1A1A]/15 rounded-md overflow-hidden bg-white">
                 {results.map((r) => (
                   <button
                     key={r.id}
